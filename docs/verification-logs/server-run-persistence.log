@@ -1,0 +1,159 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Build was configured to prefer settings repositories over project repositories but repository 'Mojang Minecraft Libraries' was added by plugin class 'net.neoforged.moddevgradle.internal.RepositoriesPlugin'
+Build was configured to prefer settings repositories over project repositories but repository 'Mojang Minecraft Libraries' was added by plugin class 'net.neoforged.moddevgradle.internal.RepositoriesPlugin'
+Build was configured to prefer settings repositories over project repositories but repository 'Mojang Meta' was added by plugin class 'net.neoforged.moddevgradle.internal.RepositoriesPlugin'
+Build was configured to prefer settings repositories over project repositories but repository 'Mojang Meta' was added by plugin class 'net.neoforged.moddevgradle.internal.RepositoriesPlugin'
+Build was configured to prefer settings repositories over project repositories but repository 'NeoForged Releases' was added by plugin class 'net.neoforged.moddevgradle.internal.RepositoriesPlugin'
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :writeServerLegacyClasspath UP-TO-DATE
+> Task :prepareServerRun UP-TO-DATE
+
+> Task :runServer
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[11:37:12] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.233, --fml.neoFormVersion, 20240808.144430, --nogui]
+[11:37:12] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation Java HotSpot(TM) 64-Bit Server VM 21.0.8+12-LTS-250
+[11:37:12] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.8 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[11:37:12] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[11:37:12] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/C:/Users/lxqlzxlyh/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[11:37:13] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[11:37:13] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Architectury 13.0.6 (architectury)
+		Better Minecraft Shop 1.0.0 (better_minecraft_shop)
+		FTB Library 2101.1.37 (ftblibrary)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.233 (neoforge)
+[11:37:14] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, ., --nogui]
+[11:37:15] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+[11:37:20] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[11:37:20] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[11:37:20] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[11:37:20] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[11:37:20] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[11:37:20] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.233, for MC 1.21.1
+[11:37:20] [modloading-worker-0/INFO] [Better Minecraft Shop/]: Better Minecraft Shop 已加载：深索币货币 + FTB Library 侧边栏商店入口
+[11:37:20] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[11:37:20] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/C:/LxqAppData/DSHwork/dsh-mc-neoforge-bmcs/bmcs/build/moddev/artifacts/neoforge-21.1.233.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[11:37:20] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/C:/LxqAppData/DSHwork/dsh-mc-neoforge-bmcs/bmcs/build/moddev/artifacts/neoforge-21.1.233.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[11:37:21] [main/INFO] [minecraft/RecipeManager]: Loaded 1290 recipes
+[11:37:21] [main/INFO] [minecraft/AdvancementTree]: Loaded 1399 advancements
+[11:37:21] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.1
+[11:37:21] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[11:37:21] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[11:37:21] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[11:37:21] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25565
+[11:37:21] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using default channel type
+[11:37:21] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[11:37:21] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[11:37:21] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[11:37:21] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[11:37:21] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[11:37:22] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[11:37:22] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[11:37:22] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 365 ms
+[11:37:22] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.863s)! For help, type "help"
+[11:37:22] [Server thread/INFO] [minecraft/DedicatedServer]: Starting remote control listener
+[11:37:22] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Listener started
+[11:37:22] [Server thread/INFO] [minecraft/RconThread]: RCON running on 0.0.0.0:25575
+[11:37:22] [LanServerPinger #1/WARN] [minecraft/LanServerPinger]: LanServerPinger: Network is unreachable: sendto
+[11:37:22] [Server thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[11:37:22] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[11:37:22] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：5 个分类 / 20 件商品（其中 2 件带自定义组件）
+[11:37:22] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 combat.1 = Diamond Sword（附魔 2 项）
+[11:37:22] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 combat.2 = 深索纪念胸甲（附魔 2 项）
+[11:37:22] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店就绪：目录版本 1，限量商品 5 项
+[11:38:08] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[11:38:09] [RCON Client /127.0.0.1 #2/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[11:38:17] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[11:38:17] [Server thread/ERROR] [Better Minecraft Shop/]: [Better Minecraft Shop] robustness_test.1 的物品不存在或是空气：minecraft:this_item_does_not_exist
+[11:38:17] [Server thread/ERROR] [Better Minecraft Shop/]: [Better Minecraft Shop] robustness_test.2 的 price 必须 >= 1（当前 0），已跳过
+[11:38:17] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] robustness_test.3 的 sell_price(999) 高于 price(10)，会形成刷钱漏洞，已按 price 处理
+[11:38:17] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：6 个分类 / 22 件商品（其中 2 件带自定义组件）；跳过 2 条无效配置，详见上方日志
+[11:38:17] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 combat.1 = Diamond Sword（附魔 2 项）
+[11:38:17] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 combat.2 = 深索纪念胸甲（附魔 2 项）
+[11:38:17] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Shop config reloaded: 6 categories / 22 items (revision 2)]
+[11:38:18] [RCON Client /127.0.0.1 #3/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[11:38:23] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[11:38:23] [Server thread/ERROR] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置解析异常，已保留上一份可用数据
+com.google.gson.JsonSyntaxException: java.io.EOFException: End of input at line 2 column 1 path $.categories[0].id
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.internal.Streams.parse(Streams.java:59) ~[gson-2.10.1.jar%2370!/:?] {}
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.JsonParser.parseReader(JsonParser.java:102) ~[gson-2.10.1.jar%2370!/:?] {}
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.JsonParser.parseReader(JsonParser.java:70) ~[gson-2.10.1.jar%2370!/:?] {}
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.JsonParser.parseString(JsonParser.java:51) ~[gson-2.10.1.jar%2370!/:?] {}
+	at TRANSFORMER/better_minecraft_shop@1.0.0/com.lyhyy2007.bmcs.config.ShopConfig.parse(ShopConfig.java:199) ~[%23127!/:?] {re:classloading}
+	at TRANSFORMER/better_minecraft_shop@1.0.0/com.lyhyy2007.bmcs.config.ShopConfig.load(ShopConfig.java:142) ~[%23127!/:?] {re:classloading}
+	at TRANSFORMER/better_minecraft_shop@1.0.0/com.lyhyy2007.bmcs.shop.ShopManager.reload(ShopManager.java:152) ~[%23127!/:?] {re:classloading}
+	at TRANSFORMER/better_minecraft_shop@1.0.0/com.lyhyy2007.bmcs.command.BmcsCommands.reload(BmcsCommands.java:141) ~[%23127!/:?] {re:classloading}
+	at TRANSFORMER/better_minecraft_shop@1.0.0/com.lyhyy2007.bmcs.command.BmcsCommands.lambda$register$12(BmcsCommands.java:69) ~[%23127!/:?] {re:classloading}
+	at MC-BOOTSTRAP/brigadier@1.3.10/com.mojang.brigadier.context.ContextChain.runExecutable(ContextChain.java:73) ~[brigadier-1.3.10.jar%2378!/:?] {}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.commands.execution.tasks.ExecuteCommand.execute(ExecuteCommand.java:29) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.commands.execution.tasks.ExecuteCommand.execute(ExecuteCommand.java:13) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.commands.execution.UnboundEntryAction.lambda$bind$0(UnboundEntryAction.java:8) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.commands.execution.CommandQueueEntry.execute(CommandQueueEntry.java:5) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.commands.execution.ExecutionContext.runCommandQueue(ExecutionContext.java:103) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.commands.Commands.executeCommandInContext(Commands.java:363) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.commands.Commands.performCommand(Commands.java:284) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.commands.Commands.performPrefixedCommand(Commands.java:264) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.dedicated.DedicatedServer.lambda$runCommand$3(DedicatedServer.java:556) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?] {}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.TickTask.run(TickTask.java:18) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:148) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.MinecraftServer.doRunTask(MinecraftServer.java:872) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.MinecraftServer.doRunTask(MinecraftServer.java:170) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:122) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.MinecraftServer.pollTaskInternal(MinecraftServer.java:855) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.MinecraftServer.pollTask(MinecraftServer.java:849) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.managedBlock(BlockableEventLoop.java:132) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.MinecraftServer.managedBlock(MinecraftServer.java:821) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.MinecraftServer.waitUntilNextTick(MinecraftServer.java:826) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:712) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.MinecraftServer.lambda$spin$2(MinecraftServer.java:267) ~[neoforge-21.1.233.jar%23125!/:?] {re:classloading,pl:accesstransformer:B}
+	at java.base/java.lang.Thread.run(Thread.java:1583) [?:?] {}
+Caused by: java.io.EOFException: End of input at line 2 column 1 path $.categories[0].id
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.stream.JsonReader.nextNonWhitespace(JsonReader.java:1457) ~[gson-2.10.1.jar%2370!/:?] {}
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.stream.JsonReader.doPeek(JsonReader.java:503) ~[gson-2.10.1.jar%2370!/:?] {}
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.stream.JsonReader.hasNext(JsonReader.java:422) ~[gson-2.10.1.jar%2370!/:?] {}
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.internal.bind.TypeAdapters$28.read(TypeAdapters.java:779) ~[gson-2.10.1.jar%2370!/:?] {}
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.internal.bind.TypeAdapters$28.read(TypeAdapters.java:725) ~[gson-2.10.1.jar%2370!/:?] {}
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.internal.Streams.parse(Streams.java:49) ~[gson-2.10.1.jar%2370!/:?] {}
+	... 34 more
+[11:38:23] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Shop config reloaded: 6 categories / 22 items (revision 2)]
+[11:38:24] [RCON Client /127.0.0.1 #4/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[11:38:24] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[11:38:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：5 个分类 / 20 件商品（其中 2 件带自定义组件）
+[11:38:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 combat.1 = Diamond Sword（附魔 2 项）
+[11:38:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 combat.2 = 深索纪念胸甲（附魔 2 项）
+[11:38:24] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Shop config reloaded: 5 categories / 20 items (revision 3)]
+[11:38:25] [RCON Client /127.0.0.1 #5/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[11:38:30] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[11:38:30] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店已停止
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[11:38:30] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[11:38:30] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Listener stopped
+[11:38:30] [RCON Client /127.0.0.1 #6/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[11:38:30] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 stopped
+
+BUILD SUCCESSFUL in 1m 30s
+7 actionable tasks: 1 executed, 6 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.2.1/userguide/configuration_cache_enabling.html

@@ -1,0 +1,30 @@
+# 统一换行与文本编码处理 / normalize line endings and mark binaries
+* text=auto eol=lf
+
+# 源码与配置按文本处理（仓库内统一 LF）
+*.java    text eol=lf
+*.gradle  text eol=lf
+*.properties text eol=lf
+*.json    text eol=lf
+*.toml    text eol=lf
+*.md      text eol=lf
+*.py      text eol=lf
+*.txt     text eol=lf
+*.log     text eol=lf
+
+# 显式指定编码，避免中文 lang / 文档在 Windows 上被当成 GBK
+*.json    working-tree-encoding=UTF-8
+*.toml    working-tree-encoding=UTF-8
+*.md      working-tree-encoding=UTF-8
+*.py      working-tree-encoding=UTF-8
+
+# 二进制文件不做换行转换
+*.jar     binary
+*.png     binary
+*.dat     binary
+*.zip     binary
+
+# GitHub 语言统计：把文档与脚本排除在“语言占比”之外
+docs/**   linguist-documentation
+tools/**  linguist-vendored=false
+*.md      linguist-documentation

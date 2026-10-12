@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "weapons_tools",
+      "icon": "minecraft:diamond_sword",
+      "items": [
+        {
+          "item": "minecraft:diamond_sword",
+          "price": 6000,
+          "sell_price": 1500,
+          "stock": 4,
+          "max_stack": 1,
+          "components": {
+            "minecraft:enchantments": {
+              "minecraft:sharpness": 5,
+              "minecraft:unbreaking": 3
+            }
+          }
+        },
+        {
+          "item": "minecraft:netherite_chestplate",
+          "price": 24000,
+          "sell_price": 6000,
+          "stock": 2,
+          "max_stack": 1,
+          "components": {
+            "minecraft:custom_name": "深索纪念胸甲",
+            "minecraft:lore": ["深索币官方发售 #001", "名字里带 # 也能正常显示"],
+            "minecraft:enchantments": {
+              "minecraft:protection": 4,
+              "minecraft:mending": 1
+            }
+          }
+        },
+        { "item": "minecraft:iron_pickaxe", "price": 300, "sell_price": 90, "stock": -1 },
+        { "item": "minecraft:bow", "price": 400, "sell_price": 120, "stock": -1 },
+        { "item": "minecraft:arrow", "price": 5, "sell_price": 1, "stock": -1 },
+        { "item": "minecraft:shield", "price": 200, "sell_price": 60, "stock": -1 }
+      ]
+    }
+  ]
+}

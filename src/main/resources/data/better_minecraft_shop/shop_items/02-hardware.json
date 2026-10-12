@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "hardware",
+      "icon": "minecraft:iron_ingot",
+      "items": [
+        { "item": "minecraft:copper_ingot", "price": 60, "sell_price": 20, "stock": -1 },
+        { "item": "minecraft:iron_ingot", "price": 120, "sell_price": 40, "stock": -1 },
+        { "item": "minecraft:gold_ingot", "price": 300, "sell_price": 100, "stock": -1 },
+        { "item": "minecraft:netherite_ingot", "price": 8000, "sell_price": 2500, "stock": 8, "max_stack": 16 },
+        { "item": "minecraft:iron_block", "price": 1000, "sell_price": 350, "stock": -1 },
+        { "item": "minecraft:gold_block", "price": 2600, "sell_price": 900, "stock": -1 }
+      ]
+    }
+  ]
+}

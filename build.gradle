@@ -1,0 +1,112 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.144'
+    id 'idea'
+}
+
+version = mod_version
+group = mod_group_id
+
+// jar 文件名保留品牌写法（连字符），loader 侧 modId 用下划线，见 gradle.properties 注释。
+base {
+    archivesName = 'better-minecraft-shop'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+// 仓库全部在 settings.gradle 的 dependencyResolutionManagement 里声明（PREFER_SETTINGS），
+// 原因见该文件的注释：本机 maven.neoforged.net 不可达，必须绕开插件自动添加的仓库。
+
+neoForge {
+    version = project.neo_version
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        data {
+            data()
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// runData 输出挂进资源源集，随 jar 打包（勿手动改 generated 文件）。
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// ---------------------------------------------------------------------------
+// 前置模组：FTB Library（All Rights Reserved，仅通过其公开 API / JSON 集成）
+//           + Architectury API（FTB Library 的强制前置；自定义侧边栏点击事件要用它的 Event API）
+//
+// 两种情况都支持：
+//   A. libs/ 下放了官方 jar  → 离线 / 内网也能构建（jar 不入库，见 .gitignore）
+//   B. libs/ 为空            → 回退到官方 maven 坐标自动下载（需要网络，仓库见 settings.gradle）
+//
+// 本仓库**不分发** FTB Library / Architectury 的二进制（FTB Library 为 ARR）：
+//   FTB Library : https://maven.ftb.dev/releases/dev/ftb/mods/ftb-library-neoforge/<版本>/
+//   Architectury: https://maven.architectury.dev/dev/architectury/architectury-neoforge/<版本>/
+// ---------------------------------------------------------------------------
+def ftbJar = file("libs/ftb-library-neoforge-${ftb_library_version}.jar")
+def archJar = file("libs/architectury-${architectury_version}-neoforge.jar")
+def useLocalJars = ftbJar.exists() && archJar.exists()
+
+if (useLocalJars) {
+    logger.lifecycle("使用 libs/ 下的本地前置 jar：${ftbJar.name} / ${archJar.name}")
+} else {
+    logger.lifecycle("libs/ 下没有本地前置 jar，将回退到官方 maven 坐标（需要网络）：" +
+            "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version} / " +
+            "dev.architectury:architectury-neoforge:${architectury_version}")
+}
+
+dependencies {
+    if (useLocalJars) {
+        // 编译期 + 开发运行期（runClient / runServer）挂本地 jar；发布时不打进本模组 jar
+        compileOnly files(ftbJar)
+        compileOnly files(archJar)
+        runtimeOnly files(ftbJar)
+        runtimeOnly files(archJar)
+    } else {
+        compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+        compileOnly "dev.architectury:architectury-neoforge:${architectury_version}"
+        runtimeOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+        runtimeOnly "dev.architectury:architectury-neoforge:${architectury_version}"
+    }
+}
+
+// 只在 neoforge.mods.toml 上做占位符展开，其它资源文件原样复制。
+// 注意：expand 底层是 Groovy 模板引擎，会把它看到的任何“美元号+花括号”片段
+// 当作表达式求值——资源文件里出现非占位符的该类写法会让构建以模板解析失败报错。
+// filteringCharset 固定为 UTF-8，避免中文/俄文 lang 文件在 GBK 默认平台编码下损坏。
+processResources {
+    filteringCharset = 'UTF-8'
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand project.properties
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : mod_id,
+                "Specification-Vendor"    : mod_authors,
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : mod_authors,
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}

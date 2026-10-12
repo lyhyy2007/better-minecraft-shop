@@ -1,0 +1,26 @@
+--- bmcs reload
+Shop config reloaded: 6 categories / 22 items (revision 2)
+--- bmcs stock list
+22 items:
+  blocks.1  石头  ->  unlimited
+  blocks.2  圆石  ->  unlimited
+  blocks.3  橡木原木  ->  unlimited
+  blocks.4  玻璃  ->  unlimited
+  blocks.5  沙子  ->  unlimited
+  ores.1  煤炭  ->  unlimited
+  ores.2  铁锭  ->  unlimited
+  ores.3  金锭  ->  unlimited
+  ores.4  钻石  ->  55
+  ores.5  下界合金锭  ->  8
+  food.1  面包  ->  unlimited
+  food.2  牛排  ->  unlimited
+  food.3  金苹果  ->  32
+  combat.1  锋利V钻石剑  ->  3
+  combat.2  铭刻下界合金胸甲  ->  2
+  combat.3  弓  ->  unlimited
+  combat.4  箭  ->  unlimited
+  misc.1  火把  ->  unlimited
+  misc.2  末影珍珠  ->  unlimited
+  misc.3  附魔之瓶  ->  unlimited
+  robustness_test.3  苹果(卖价异常)  ->  unlimited
+  robustness_test.4  苹果(正常)  ->  unlimited

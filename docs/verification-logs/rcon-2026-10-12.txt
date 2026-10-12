@@ -1,0 +1,374 @@
+
+==================== rcon-10.txt ====================
+--- stop
+Stopping the server
+
+==================== rcon-11.txt ====================
+--- stop
+Stopping the server
+
+==================== rcon-12.txt ====================
+--- bmcs debug sync
+Snapshot sync diagnostic: 10044 items / 21 batches
+  assembling snapshot: 8 ms
+  encoding: 74 ms (largest packet 36 KB / total 656 KB)
+  localized-name index (also built on the client when assembling): 6 ms (99290 chars)
+--- bmcs debug config
+Shop config statistics: 目录版本 3：8 个分类 / 10044 件商品 / 9 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 217ms
+Config directory: C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+Category priority (high to low): weapons_tools > hardware > building > stone > wood > material > food > seeds
+Config hot reload: watching (2 automatic reloads)
+--- bmcs stock set hardware.4 3
+Stock of hardware.4 set to 3
+--- bmcs stock set weapons_tools.1 5
+Stock of weapons_tools.1 set to 5
+
+==================== rcon-13.txt ====================
+--- bmcs stock set stone.6 11
+Stock of stone.6 set to 11
+--- bmcs stock reset stone.6
+Stock of stone.6 reset to the configured value 4
+
+==================== rcon-14.txt ====================
+--- bmcs debug item minecraft:netherite_ingot
+Localization info for minecraft:netherite_ingot:
+  translation key (descriptionId): item.minecraft.netherite_ingot
+  present in server language table: true
+  server-side rendering: Netherite Ingot
+for sale hardware.4: buy 8,000 DeepCoin / sell 2,500 DeepCoin / stock 3
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- stop
+Stopping the server
+
+==================== rcon-15.txt ====================
+--- bmcs debug item minecraft:netherite_ingot
+Localization info for minecraft:netherite_ingot:
+  translation key (descriptionId): item.minecraft.netherite_ingot
+  present in server language table: true
+  server-side rendering: Netherite Ingot
+for sale hardware.4: buy 8,000 DeepCoin / sell 2,500 DeepCoin / stock 3
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- bmcs debug item minecraft:diamond_sword
+Localization info for minecraft:diamond_sword:
+  translation key (descriptionId): item.minecraft.diamond_sword
+  present in server language table: true
+  server-side rendering: Diamond Sword
+for sale weapons_tools.1: buy 6,000 DeepCoin / sell 1,500 DeepCoin / stock 4
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- bmcs debug config
+Shop config statistics: 目录版本 1：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 18ms
+Config directory: C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+Category priority (high to low): weapons_tools > hardware > building > stone > wood > material > food > seeds
+Config hot reload: watching (0 automatic reloads)
+
+==================== rcon-16.txt ====================
+--- stop
+Stopping the server
+
+==================== rcon-17.txt ====================
+--- bmcs stock set weapons_tools.1 9
+Stock of weapons_tools.1 set to 9
+--- bmcs reload
+Shop config reloaded: 目录版本 2：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 3ms
+--- bmcs debug item minecraft:diamond_sword
+Localization info for minecraft:diamond_sword:
+  translation key (descriptionId): item.minecraft.diamond_sword
+  present in server language table: true
+  server-side rendering: Diamond Sword
+for sale weapons_tools.1: buy 6,000 DeepCoin / sell 1,500 DeepCoin / stock 9
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- bmcs debug config
+Shop config statistics: 目录版本 2：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 3ms
+Config directory: C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+Category priority (high to low): weapons_tools > hardware > building > stone > wood > material > food > seeds
+Config hot reload: watching (0 automatic reloads)
+
+==================== rcon-18.txt ====================
+--- bmcs debug item minecraft:diamond_sword
+Localization info for minecraft:diamond_sword:
+  translation key (descriptionId): item.minecraft.diamond_sword
+  present in server language table: true
+  server-side rendering: Diamond Sword
+for sale weapons_tools.1: buy 6,000 DeepCoin / sell 1,500 DeepCoin / stock 2
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+
+==================== rcon-19.txt ====================
+--- stop
+Stopping the server
+
+==================== rcon-20.txt ====================
+--- bmcs debug item minecraft:diamond_sword
+Localization info for minecraft:diamond_sword:
+  translation key (descriptionId): item.minecraft.diamond_sword
+  present in server language table: true
+  server-side rendering: Diamond Sword
+for sale weapons_tools.1: buy 6,000 DeepCoin / sell 1,500 DeepCoin / stock 2
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- bmcs debug item minecraft:netherite_ingot
+Localization info for minecraft:netherite_ingot:
+  translation key (descriptionId): item.minecraft.netherite_ingot
+  present in server language table: true
+  server-side rendering: Netherite Ingot
+for sale hardware.4: buy 8,000 DeepCoin / sell 2,500 DeepCoin / stock 3
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+
+==================== rcon-21.txt ====================
+--- stop
+Stopping the server
+
+==================== rcon-22.txt ====================
+--- bmcs debug sync
+Snapshot sync diagnostic: 44 items / 1 batches
+  assembling snapshot: 1 ms
+  encoding: 3 ms (largest packet 1 KB / total 1 KB)
+  localized-name index (also built on the client when assembling): 0 ms (396 chars)
+--- bmcs debug config
+Shop config statistics: 目录版本 5：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+Config directory: C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+Category priority (high to low): weapons_tools > hardware > building > stone > wood > material > food > seeds
+Config hot reload: watching (4 automatic reloads)
+--- bmcs stock list
+44 items:
+  weapons_tools.1  Diamond Sword  ->  4
+  weapons_tools.2  深索纪念胸甲  ->  2
+  weapons_tools.3  Iron Pickaxe  ->  unlimited
+  weapons_tools.4  Bow  ->  unlimited
+  weapons_tools.5  Arrow  ->  unlimited
+  weapons_tools.6  Shield  ->  unlimited
+  hardware.1  Copper Ingot  ->  unlimited
+  hardware.2  Iron Ingot  ->  unlimited
+  hardware.3  Gold Ingot  ->  unlimited
+  hardware.4  Netherite Ingot  ->  8
+  hardware.5  Block of Iron  ->  unlimited
+  hardware.6  Block of Gold  ->  unlimited
+  building.1  Glass  ->  unlimited
+  building.2  Torch  ->  unlimited
+  building.3  Ladder  ->  unlimited
+  building.4  Stone Bricks  ->  unlimited
+  building.5  Bricks  ->  unlimited
+  stone.1  Stone  ->  unlimited
+  stone.2  Cobblestone  ->  unlimited
+  stone.3  Sand  ->  unlimited
+  stone.4  Sandstone  ->  unlimited
+  stone.5  Obsidian  ->  unlimited
+  wood.1  Oak Log  ->  unlimited
+  wood.2  Spruce Log  ->  unlimited
+  wood.3  Oak Planks  ->  unlimited
+  wood.4  Stick  ->  unlimited
+  material.1  Coal  ->  unlimited
+  material.2  Redstone Dust  ->  unlimited
+  material.3  Lapis Lazuli  ->  unlimited
+  material.4  Diamond  ->  100
+  material.5  Emerald  ->  64
+  material.6  Ender Pearl  ->  unlimited
+  material.7  Bottle o' Enchanting  ->  unlimited
+  food.1  Apple  ->  unlimited
+  food.2  Bread  ->  unlimited
+  food.3  Steak  ->  unlimited
+  food.4  Cooked Chicken  ->  unlimited
+  food.5  Golden Apple  ->  32
+  seeds.1  Wheat Seeds  ->  unlimited
+  seeds.2  Beetroot Seeds  ->  unlimited
+  seeds.3  Melon Seeds  ->  unlimited
+  seeds.4  Pumpkin Seeds  ->  unlimited
+  seeds.5  Wheat  ->  unlimited
+  seeds.6  Potato  ->  unlimited
+
+==================== rcon-23.txt ====================
+--- stop
+Stopping the server
+
+==================== rcon-5a.txt ====================
+--- bmcs debug config
+Shop config statistics: 8 个分类 / 45 件商品 / 8 个文件 / 去重 0 条 / 跳过 0 条 / 耗时 24ms
+Config directory: C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+Category priority (high to low): weapons_tools > hardware > building > stone > wood > material > food > seeds
+Config hot reload: watching (0 automatic reloads)
+--- bmcs debug item minecraft:stone
+Expected whitespace to end one argument, but found trailing data
+... minecraft:stone<--[HERE]
+--- bmcs debug item minecraft:diamond_sword
+Expected whitespace to end one argument, but found trailing data
+... minecraft:diamond_sword<--[HERE]
+
+==================== rcon-5b.txt ====================
+--- stop
+Stopping the server
+
+==================== rcon-6a.txt ====================
+--- bmcs debug config
+Shop config statistics: 目录版本 1：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 32ms
+Config directory: C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+Category priority (high to low): weapons_tools > hardware > building > stone > wood > material > food > seeds
+Config hot reload: watching (0 automatic reloads)
+--- bmcs debug item minecraft:stone
+Localization info for minecraft:stone:
+  translation key (descriptionId): block.minecraft.stone
+  present in server language table: true
+  server-side rendering: Stone
+for sale stone.1: buy 10 DeepCoin / sell 3 DeepCoin / stock unlimited
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- bmcs debug item minecraft:diamond_sword
+Localization info for minecraft:diamond_sword:
+  translation key (descriptionId): item.minecraft.diamond_sword
+  present in server language table: true
+  server-side rendering: Diamond Sword
+for sale weapons_tools.1: buy 6,000 DeepCoin / sell 1,500 DeepCoin / stock 4
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- bmcs debug item minecraft:ender_eye
+Localization info for minecraft:ender_eye:
+  translation key (descriptionId): item.minecraft.ender_eye
+  present in server language table: true
+  server-side rendering: Eye of Ender
+not for sale (absent from the shop catalogue)
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- bmcs debug sync
+A player is required to run this command here
+--- bmcs stock set stone.1 7
+stone.1 is unlimited, no stock to set
+
+==================== rcon-6b.txt ====================
+--- stop
+Stopping the server
+
+==================== rcon-7.txt ====================
+--- bmcs debug sync
+Snapshot sync diagnostic: 44 items / 1 batches
+  assembling snapshot: 2 ms
+  encoding: 4 ms (largest packet 1 KB / total 1 KB)
+  localized-name index (also built on the client when assembling): 0 ms (396 chars)
+--- bmcs stock set weapons_tools.1 7
+Stock of weapons_tools.1 set to 7
+--- bmcs stock set hardware.4 3
+Stock of hardware.4 set to 3
+--- bmcs stock list
+44 items:
+  weapons_tools.1  Diamond Sword  ->  7
+  weapons_tools.2  深索纪念胸甲  ->  2
+  weapons_tools.3  Iron Pickaxe  ->  unlimited
+  weapons_tools.4  Bow  ->  unlimited
+  weapons_tools.5  Arrow  ->  unlimited
+  weapons_tools.6  Shield  ->  unlimited
+  hardware.1  Copper Ingot  ->  unlimited
+  hardware.2  Iron Ingot  ->  unlimited
+  hardware.3  Gold Ingot  ->  unlimited
+  hardware.4  Netherite Ingot  ->  3
+  hardware.5  Block of Iron  ->  unlimited
+  hardware.6  Block of Gold  ->  unlimited
+  building.1  Glass  ->  unlimited
+  building.2  Torch  ->  unlimited
+  building.3  Ladder  ->  unlimited
+  building.4  Stone Bricks  ->  unlimited
+  building.5  Bricks  ->  unlimited
+  stone.1  Stone  ->  unlimited
+  stone.2  Cobblestone  ->  unlimited
+  stone.3  Sand  ->  unlimited
+  stone.4  Sandstone  ->  unlimited
+  stone.5  Obsidian  ->  unlimited
+  wood.1  Oak Log  ->  unlimited
+  wood.2  Spruce Log  ->  unlimited
+  wood.3  Oak Planks  ->  unlimited
+  wood.4  Stick  ->  unlimited
+  material.1  Coal  ->  unlimited
+  material.2  Redstone Dust  ->  unlimited
+  material.3  Lapis Lazuli  ->  unlimited
+  material.4  Diamond  ->  100
+  material.5  Emerald  ->  64
+  material.6  Ender Pearl  ->  unlimited
+  material.7  Bottle o' Enchanting  ->  unlimited
+  food.1  Apple  ->  unlimited
+  food.2  Bread  ->  unlimited
+  food.3  Steak  ->  unlimited
+  food.4  Cooked Chicken  ->  unlimited
+  food.5  Golden Apple  ->  32
+  seeds.1  Wheat Seeds  ->  unlimited
+  seeds.2  Beetroot Seeds  ->  unlimited
+  seeds.3  Melon Seeds  ->  unlimited
+  seeds.4  Pumpkin Seeds  ->  unlimited
+  seeds.5  Wheat  ->  unlimited
+  seeds.6  Potato  ->  unlimited
+
+==================== rcon-8.txt ====================
+--- bmcs debug config
+Shop config statistics: 目录版本 2：12 个分类 / 44 件商品 / 9 个文件 / 去重 21 条 / 跳过 0 条 / 耗时 9ms
+Config directory: C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+Category priority (high to low): weapons_tools > hardware > building > stone > wood > material > food > seeds
+Config hot reload: watching (1 automatic reloads)
+
+==================== rcon-9.txt ====================
+--- bmcs debug item minecraft:stone
+Localization info for minecraft:stone:
+  translation key (descriptionId): block.minecraft.stone
+  present in server language table: true
+  server-side rendering: Stone
+for sale stone.1: buy 777 DeepCoin / sell 3 DeepCoin / stock unlimited
+Note: the server language table only has vanilla en_us plus server-side injections; mod items are displayed using each player's client language files.
+--- bmcs debug config
+Shop config statistics: 目录版本 4：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+Config directory: C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+Category priority (high to low): weapons_tools > hardware > building > stone > wood > material > food > seeds
+Config hot reload: watching (3 automatic reloads)
+
+==================== rcon-out.txt ====================
+--- bmcs stock set combat.1 3
+Stock of combat.1 set to 3
+--- bmcs stock set ores.4 55
+Stock of ores.4 set to 55
+--- stop
+Stopping the server
+
+==================== rcon-out2.txt ====================
+--- bmcs stock list
+20 items:
+  blocks.1  石头  ->  unlimited
+  blocks.2  圆石  ->  unlimited
+  blocks.3  橡木原木  ->  unlimited
+  blocks.4  玻璃  ->  unlimited
+  blocks.5  沙子  ->  unlimited
+  ores.1  煤炭  ->  unlimited
+  ores.2  铁锭  ->  unlimited
+  ores.3  金锭  ->  unlimited
+  ores.4  钻石  ->  55
+  ores.5  下界合金锭  ->  8
+  food.1  面包  ->  unlimited
+  food.2  牛排  ->  unlimited
+  food.3  金苹果  ->  32
+  combat.1  锋利V钻石剑  ->  3
+  combat.2  铭刻下界合金胸甲  ->  2
+  combat.3  弓  ->  unlimited
+  combat.4  箭  ->  unlimited
+  misc.1  火把  ->  unlimited
+  misc.2  末影珍珠  ->  unlimited
+  misc.3  附魔之瓶  ->  unlimited
+
+==================== rcon-out3.txt ====================
+--- bmcs reload
+Shop config reloaded: 6 categories / 22 items (revision 2)
+--- bmcs stock list
+22 items:
+  blocks.1  石头  ->  unlimited
+  blocks.2  圆石  ->  unlimited
+  blocks.3  橡木原木  ->  unlimited
+  blocks.4  玻璃  ->  unlimited
+  blocks.5  沙子  ->  unlimited
+  ores.1  煤炭  ->  unlimited
+  ores.2  铁锭  ->  unlimited
+  ores.3  金锭  ->  unlimited
+  ores.4  钻石  ->  55
+  ores.5  下界合金锭  ->  8
+  food.1  面包  ->  unlimited
+  food.2  牛排  ->  unlimited
+  food.3  金苹果  ->  32
+  combat.1  锋利V钻石剑  ->  3
+  combat.2  铭刻下界合金胸甲  ->  2
+  combat.3  弓  ->  unlimited
+  combat.4  箭  ->  unlimited
+  misc.1  火把  ->  unlimited
+  misc.2  末影珍珠  ->  unlimited
+  misc.3  附魔之瓶  ->  unlimited
+  robustness_test.3  苹果(卖价异常)  ->  unlimited
+  robustness_test.4  苹果(正常)  ->  unlimited
+
+==================== rcon-out4.txt ====================
+--- bmcs reload
+Shop config reloaded: 5 categories / 20 items (revision 3)

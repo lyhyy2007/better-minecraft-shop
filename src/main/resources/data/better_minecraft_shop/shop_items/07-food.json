@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "food",
+      "icon": "minecraft:bread",
+      "items": [
+        { "item": "minecraft:apple", "price": 10, "sell_price": 3, "stock": -1 },
+        { "item": "minecraft:bread", "price": 20, "sell_price": 6, "stock": -1 },
+        { "item": "minecraft:cooked_beef", "price": 35, "sell_price": 12, "stock": -1 },
+        { "item": "minecraft:cooked_chicken", "price": 25, "sell_price": 8, "stock": -1 },
+        { "item": "minecraft:golden_apple", "price": 800, "sell_price": 200, "stock": 32, "max_stack": 64 }
+      ]
+    }
+  ]
+}

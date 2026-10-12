@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "seeds",
+      "icon": "minecraft:wheat_seeds",
+      "items": [
+        { "item": "minecraft:wheat_seeds", "price": 4, "sell_price": 1, "stock": -1 },
+        { "item": "minecraft:beetroot_seeds", "price": 4, "sell_price": 1, "stock": -1 },
+        { "item": "minecraft:melon_seeds", "price": 6, "sell_price": 2, "stock": -1 },
+        { "item": "minecraft:pumpkin_seeds", "price": 6, "sell_price": 2, "stock": -1 },
+        { "item": "minecraft:wheat", "price": 10, "sell_price": 3, "stock": -1 },
+        { "item": "minecraft:potato", "price": 6, "sell_price": 2, "stock": -1 }
+      ]
+    }
+  ]
+}

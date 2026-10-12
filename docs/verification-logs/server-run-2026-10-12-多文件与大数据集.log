@@ -1,0 +1,237 @@
+
+======================== 第 1 轮：多文件 / 旧单文件兼容 / 跨分类去重 / 热重载 / 坏文件与 BOM 隔离 ========================
+[14:34:22] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.889s)! For help, type "help"
+[14:34:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:34:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 34 ms
+[14:34:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:34:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:34:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店就绪：目录版本 1，限量商品 6 项
+[14:34:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已开始监听配置目录变更：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 1 次）
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：01-weapons_tools.json 分类 weapons_tools 第 1 条 中的 minecraft:diamond_sword|{
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：01-weapons_tools.json 分类 weapons_tools 第 2 条 中的 minecraft:netherite_chestplate|{
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：01-weapons_tools.json 分类 weapons_tools 第 4 条 中的 minecraft:bow| 与 shop_items.json 分类 combat 第 3 条 冲突（分类 weapons_tools），按优先级 80 保留 shop_items.json 分类 combat 第 3 条，丢弃 01-weapons_tools.json 分类 weapons_tools 第 4 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：01-weapons_tools.json 分类 weapons_tools 第 5 条 中的 minecraft:arrow| 与 shop_items.json 分类 combat 第 4 条 冲突（分类 weapons_tools），按优先级 80 保留 shop_items.json 分类 combat 第 4 条，丢弃 01-weapons_tools.json 分类 weapons_tools 第 5 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：02-hardware.json 分类 hardware 第 2 条 中的 minecraft:iron_ingot| 与 shop_items.json 分类 ores 第 2 条 冲突（分类 hardware），按优先级 70 保留 shop_items.json 分类 ores 第 2 条，丢弃 02-hardware.json 分类 hardware 第 2 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：02-hardware.json 分类 hardware 第 3 条 中的 minecraft:gold_ingot| 与 shop_items.json 分类 ores 第 3 条 冲突（分类 hardware），按优先级 70 保留 shop_items.json 分类 ores 第 3 条，丢弃 02-hardware.json 分类 hardware 第 3 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：02-hardware.json 分类 hardware 第 4 条 中的 minecraft:netherite_ingot| 与 shop_items.json 分类 ores 第 5 条 冲突（分类 hardware），按优先级 70 保留 shop_items.json 分类 ores 第 5 条，丢弃 02-hardware.json 分类 hardware 第 4 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：03-building.json 分类 building 第 1 条 中的 minecraft:glass| 与 shop_items.json 分类 blocks 第 4 条 冲突（分类 building），按优先级 60 保留 shop_items.json 分类 blocks 第 4 条，丢弃 03-building.json 分类 building 第 1 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：03-building.json 分类 building 第 2 条 中的 minecraft:torch| 与 shop_items.json 分类 misc 第 1 条 冲突（分类 building），按优先级 60 保留 03-building.json 分类 building 第 2 条，丢弃 shop_items.json 分类 misc 第 1 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：04-stone.json 分类 stone 第 1 条 中的 minecraft:stone| 与 shop_items.json 分类 blocks 第 1 条 冲突（分类 stone），按优先级 60 保留 shop_items.json 分类 blocks 第 1 条，丢弃 04-stone.json 分类 stone 第 1 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：04-stone.json 分类 stone 第 2 条 中的 minecraft:cobblestone| 与 shop_items.json 分类 blocks 第 2 条 冲突（分类 stone），按优先级 60 保留 shop_items.json 分类 blocks 第 2 条，丢弃 04-stone.json 分类 stone 第 2 条。
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：04-stone.json 分类 stone 第 3 条 中的 minecraft:sand| 与 shop_items.json 分类 blocks 第 5 条 冲突（分类 stone），按优先级 60 保留 shop_items.json 分类 blocks 第 5 条，丢弃 04-stone.json 分类 stone 第 3 条。（其余重复项提示已省略，可用 /bmcs debug config 查看统计）
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：9 个文件 → 12 个分类 / 44 件商品（其中 4 件带自定义组件）；去重丢弃 21 条，耗时 9 ms
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 combat.1 = Diamond Sword（附魔 2 项）
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 combat.2 = 深索纪念胸甲（附魔 2 项）
+[14:34:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 2：12 个分类 / 44 件商品 / 9 个文件 / 去重 21 条 / 跳过 0 条 / 耗时 9ms
+[14:35:16] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 2 次）
+[14:35:16] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:35:16] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 2 ms
+[14:35:16] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:35:16] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:35:16] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 3：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+[14:35:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 3 次）
+[14:35:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:35:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 2 ms
+[14:35:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:35:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:35:23] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 4：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+[14:35:43] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 4 次）
+[14:35:43] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:35:43] [Server thread/ERROR] [Better Minecraft Shop/]: [Better Minecraft Shop] 配置文件解析失败，已跳过该文件：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items\90-bad-syntax.json
+[14:35:43] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 分类 bomtest 不在内置优先级表内（按 5 处理）；需要精确控制时可在 JSON 里写 priority。内置顺序：weapons_tools > hardware > building > stone > wood > material > food > seeds
+[14:35:43] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：91-bom.json 分类 bomtest 第 1 条 中的 minecraft:apple| 与 07-food.json 分类 food 第 1 条 冲突（分类 bomtest），按优先级 20 保留 07-food.json 分类 food 第 1 条，丢弃 91-bom.json 分类 bomtest 第 1 条。
+[14:35:43] [Server thread/ERROR] [Better Minecraft Shop/]: [Better Minecraft Shop] 配置文件过大（11534385 字节 > 上限 10485760 字节），已拒绝加载：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items\92-too-big.json
+[14:35:43] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：11 个文件 → 9 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 2 条，耗时 4 ms
+[14:35:43] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] 本次加载跳过 2 条无效配置 / 文件，详见上方日志
+[14:35:43] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:35:43] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:35:43] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 5：9 个分类 / 44 件商品 / 11 个文件 / 去重 2 条 / 跳过 2 条 / 耗时 4ms
+[14:35:45] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 5 次）
+[14:35:45] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:35:45] [Server thread/ERROR] [Better Minecraft Shop/]: [Better Minecraft Shop] 配置文件解析失败，已跳过该文件：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items\90-bad-syntax.json
+[14:35:45] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 分类 bomtest 不在内置优先级表内（按 5 处理）；需要精确控制时可在 JSON 里写 priority。内置顺序：weapons_tools > hardware > building > stone > wood > material > food > seeds
+[14:35:45] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：91-bom.json 分类 bomtest 第 1 条 中的 minecraft:apple| 与 07-food.json 分类 food 第 1 条 冲突（分类 bomtest），按优先级 20 保留 07-food.json 分类 food 第 1 条，丢弃 91-bom.json 分类 bomtest 第 1 条。
+[14:35:45] [Server thread/ERROR] [Better Minecraft Shop/]: [Better Minecraft Shop] 配置文件过大（11534385 字节 > 上限 10485760 字节），已拒绝加载：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items\92-too-big.json
+[14:35:45] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：11 个文件 → 9 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 2 条，耗时 4 ms
+[14:35:45] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] 本次加载跳过 2 条无效配置 / 文件，详见上方日志
+[14:35:45] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:35:45] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:35:45] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 6：9 个分类 / 44 件商品 / 11 个文件 / 去重 2 条 / 跳过 2 条 / 耗时 4ms
+[14:36:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 6 次）
+[14:36:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:36:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 2 ms
+[14:36:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:36:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:36:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 7：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+[14:36:02] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 7 次）
+[14:36:02] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:36:02] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 2 ms
+[14:36:02] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:36:02] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:36:02] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 8：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+[14:36:07] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 8 次）
+[14:36:07] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:36:07] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：9 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 529 ms
+[14:36:07] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] 本次加载跳过 10000 条无效配置 / 文件，详见上方日志
+[14:36:07] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:36:07] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:36:07] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 9：8 个分类 / 44 件商品 / 9 个文件 / 去重 1 条 / 跳过 10000 条 / 耗时 529ms
+[14:36:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 9 次）
+[14:36:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:36:09] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：9 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 251 ms
+[14:36:09] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] 本次加载跳过 10000 条无效配置 / 文件，详见上方日志
+[14:36:09] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:36:09] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:36:09] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 10：8 个分类 / 44 件商品 / 9 个文件 / 去重 1 条 / 跳过 10000 条 / 耗时 251ms
+[14:37:34] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[14:37:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已停止监听配置目录
+[14:37:34] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店已停止
+
+======================== 第 2 轮：全新安装 + 10000 条压力配置 ========================
+[14:39:44] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.838s)! For help, type "help"
+[14:39:44] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已生成默认商店配置 8 个文件：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+[14:39:44] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:39:44] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 14 ms
+[14:39:44] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:39:44] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:39:44] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店就绪：目录版本 1，限量商品 6 项
+[14:39:44] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已开始监听配置目录变更：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop
+[14:39:52] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 1 次）
+[14:39:52] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：9 个文件 → 8 个分类 / 10044 件商品（其中 10002 件带自定义组件）；去重丢弃 1 条，耗时 387 ms
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.7 = 压力测试 #1（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.8 = 压力测试 #9（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.9 = 压力测试 #17（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.10 = 压力测试 #25（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.11 = 压力测试 #33（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.12 = 压力测试 #41（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.13 = 压力测试 #49（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.14 = 压力测试 #57（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.15 = 压力测试 #65（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.16 = 压力测试 #73（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.17 = 压力测试 #81（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.18 = 压力测试 #89（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.19 = 压力测试 #97（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.20 = 压力测试 #105（附魔 0 项）
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] …其余带组件商品略
+[14:39:53] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 2：8 个分类 / 10044 件商品 / 9 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 387ms
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 2 次）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：9 个文件 → 8 个分类 / 10044 件商品（其中 10002 件带自定义组件）；去重丢弃 1 条，耗时 217 ms
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.7 = 压力测试 #1（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.8 = 压力测试 #9（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.9 = 压力测试 #17（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.10 = 压力测试 #25（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.11 = 压力测试 #33（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.12 = 压力测试 #41（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.13 = 压力测试 #49（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.14 = 压力测试 #57（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.15 = 压力测试 #65（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.16 = 压力测试 #73（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.17 = 压力测试 #81（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.18 = 压力测试 #89（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.19 = 压力测试 #97（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.20 = 压力测试 #105（附魔 0 项）
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] …其余带组件商品略
+[14:39:54] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 3：8 个分类 / 10044 件商品 / 9 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 217ms
+[14:40:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 向 （控制台诊断） 同步 10044 条商品：21 批，组装耗时 8 ms
+[14:40:25] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 3 次）
+[14:40:25] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:40:25] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 2 ms
+[14:40:25] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:40:25] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:40:25] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 4：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+[14:40:27] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 4 次）
+[14:40:27] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:40:27] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 1 ms
+[14:40:27] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:40:27] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:40:27] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 5：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 1ms
+[14:40:32] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[14:40:32] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已停止监听配置目录
+[14:40:32] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店已停止
+
+======================== 第 3 轮：库存语义（管理员放量 9 / 配置上限 4→2 收紧） ========================
+[14:42:01] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.790s)! For help, type "help"
+[14:42:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:42:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 30 ms
+[14:42:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:42:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:42:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店就绪：目录版本 1，限量商品 6 项
+[14:42:01] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已开始监听配置目录变更：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop
+[14:42:04] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:42:04] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 3 ms
+[14:42:04] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:42:04] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:42:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 1 次）
+[14:42:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:42:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 2 ms
+[14:42:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:42:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:42:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 配置上限变化，已收紧 1 项限量商品的剩余库存
+[14:42:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 3：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+[14:42:27] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[14:42:27] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已停止监听配置目录
+[14:42:27] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店已停止
+
+======================== 第 4 轮：重启后持久化 ========================
+[14:42:55] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.841s)! For help, type "help"
+[14:42:55] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:42:55] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 20 ms
+[14:42:55] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:42:55] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:42:55] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店就绪：目录版本 1，限量商品 6 项
+[14:42:55] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已开始监听配置目录变更：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop
+[14:43:04] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[14:43:04] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已停止监听配置目录
+[14:43:04] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店已停止
+
+======================== 第 5 轮：坏配置刷屏保护（200 条非法条目） ========================
+[14:45:08] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.857s)! For help, type "help"
+[14:45:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已生成默认商店配置 8 个文件：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop\shop_items
+[14:45:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:45:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 18 ms
+[14:45:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:45:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:45:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店就绪：目录版本 1，限量商品 6 项
+[14:45:08] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已开始监听配置目录变更：C:\LxqAppData\DSHwork\dsh-mc-neoforge-bmcs\bmcs\run\config\better-minecraft-shop
+[14:45:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 1 次）
+[14:45:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:45:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 分类 badtests 不在内置优先级表内（按 5 处理）；需要精确控制时可在 JSON 里写 priority。内置顺序：weapons_tools > hardware > building > stone > wood > material > food > seeds
+[14:45:10] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] 无效配置条目较多，后续同类报错已省略（总数见本次加载汇总）
+[14:45:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 以下分类没有任何可用商品（条目非法或被更高优先级分类占用），已不显示：[badtests]
+[14:45:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：9 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 9 ms
+[14:45:10] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] 本次加载跳过 200 条无效配置 / 文件，详见上方日志
+[14:45:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:45:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:45:10] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 2：8 个分类 / 44 件商品 / 9 个文件 / 去重 1 条 / 跳过 200 条 / 耗时 9ms
+[14:45:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 2 次）
+[14:45:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:45:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 分类 badtests 不在内置优先级表内（按 5 处理）；需要精确控制时可在 JSON 里写 priority。内置顺序：weapons_tools > hardware > building > stone > wood > material > food > seeds
+[14:45:12] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] 无效配置条目较多，后续同类报错已省略（总数见本次加载汇总）
+[14:45:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 以下分类没有任何可用商品（条目非法或被更高优先级分类占用），已不显示：[badtests]
+[14:45:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：9 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 7 ms
+[14:45:12] [Server thread/WARN] [Better Minecraft Shop/]: [Better Minecraft Shop] 本次加载跳过 200 条无效配置 / 文件，详见上方日志
+[14:45:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:45:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:45:12] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 3：8 个分类 / 44 件商品 / 9 个文件 / 去重 1 条 / 跳过 200 条 / 耗时 7ms
+[14:45:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 3 次）
+[14:45:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:45:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 3 ms
+[14:45:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:45:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:45:24] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 4：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 3ms
+[14:45:26] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 检测到配置文件变化，自动重载（第 4 次）
+[14:45:26] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 重复商品：05-wood.json 分类 wood 第 5 条 中的 minecraft:stone| 与 04-stone.json 分类 stone 第 1 条 冲突（分类 wood），按优先级 50 保留 04-stone.json 分类 stone 第 1 条，丢弃 05-wood.json 分类 wood 第 5 条。
+[14:45:26] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店配置加载完成：8 个文件 → 8 个分类 / 44 件商品（其中 2 件带自定义组件）；去重丢弃 1 条，耗时 2 ms
+[14:45:26] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.1 = Diamond Sword（附魔 2 项）
+[14:45:26] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 组件商品 weapons_tools.2 = 深索纪念胸甲（附魔 2 项）
+[14:45:26] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 自动重载完成：目录版本 5：8 个分类 / 44 件商品 / 8 个文件 / 去重 1 条 / 跳过 0 条 / 耗时 2ms
+[14:45:36] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[14:45:36] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 已停止监听配置目录
+[14:45:36] [Server thread/INFO] [Better Minecraft Shop/]: [Better Minecraft Shop] 商店已停止

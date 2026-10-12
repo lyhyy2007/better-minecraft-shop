@@ -1,0 +1,19 @@
+{
+  "icon": [
+    "better_minecraft_shop:textures/shop_icon.png"
+  ],
+  "sort_index": 50,
+  "default_enabled": true,
+  "loading_screen": false,
+  "click": [
+    "better_minecraft_shop:open_shop"
+  ],
+  "tooltip": [
+    {
+      "translate": "sidebar_button.better_minecraft_shop.open_shop.desc"
+    }
+  ],
+  "required_mods": [
+    "ftblibrary"
+  ]
+}

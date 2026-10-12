@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------------------
+# 更好的 Minecraft 商店 / Better Minecraft Shop —— GitHub 上传用忽略规则
+# ---------------------------------------------------------------------------
+
+# 构建产物与本地开发环境
+build/
+.gradle/
+run/
+!run/eula.txt
+
+# 前置模组 jar：不随仓库分发（FTB Library 为 All Rights Reserved）
+# 需要离线构建时自行放进 libs/，见 libs/README.md
+libs/*.jar
+
+# IDE / 编辑器
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+*.swp
+
+# 操作系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 其它临时文件
+*.log
+_recon/
+*.tmp
+*.bak
+
+# 例外：验证证据（实测日志）要留下
+!docs/verification-logs/*.log

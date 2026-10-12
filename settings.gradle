@@ -1,0 +1,75 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        // 插件本身在 Gradle 插件门户；本机可直连（缓存里也有 moddev-gradle 2.0.144）。
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+// ---------------------------------------------------------------------------
+// 仓库统一在 settings 里声明，并设为 PREFER_SETTINGS：
+//
+//   1. moddev 插件会自动把 https://maven.neoforged.net/releases/ 塞进项目仓库列表，
+//      而本机对该域名的 DNS 被污染（解析到境外不可达地址），每次访问都要等到连接超时，
+//      几十个构件累加起来会让构建停滞几十分钟。PREFER_SETTINGS 会让项目级仓库
+//      （包括插件自动添加的那个）不再参与解析，只走下面这份可达列表。
+//   2. 本机 Gradle 缓存里的 NeoForge / NeoForm 构件本来就是按 BMCLAPI、
+//      StellarDrift 这些镜像的坐标缓存的，因此离线时也能命中，出网时还能补下缺件。
+// ---------------------------------------------------------------------------
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.PREFER_SETTINGS
+    repositories {
+        // 下面两个仓库的定义是从 moddev 插件源码里 1:1 复刻的
+        // （net.neoforged.moddevgradle.internal.RepositoriesPlugin）：
+        //   * net.neoforged:minecraft-dependencies 只存在于 mojang-meta 仓库；
+        //   * Gradle 的模块描述符缓存按「仓库身份（名称 + 地址 + 元数据源 + 内容过滤）」命中，
+        //     名称/过滤稍有出入就会退化成联网请求，而该域名在本机不可达。
+        maven {
+            name = 'Mojang Meta'
+            url = 'https://maven.neoforged.net/mojang-meta/'
+            metadataSources { gradleMetadata() }
+            content { includeModule('net.neoforged', 'minecraft-dependencies') }
+        }
+        maven {
+            name = 'Mojang Minecraft Libraries'
+            url = 'https://libraries.minecraft.net/'
+            metadataSources { mavenPom() }
+        }
+        // NeoForged Maven 的国内镜像（neoforge / neoform / mergetool / srgutils ...）
+        maven {
+            name = 'BMCLAPI'
+            url = 'https://bmclapi2.bangbang93.com/maven/'
+        }
+        // NeoForm Runtime 的发行镜像（neoform-runtime:2.0.24 的实际上游）
+        maven {
+            name = 'StellarDrift'
+            url = 'https://repo.stellardrift.ca/maven/internal/'
+        }
+        // Maven Central 及其国内镜像
+        maven {
+            name = 'AliyunPublic'
+            url = 'https://maven.aliyun.com/repository/public'
+        }
+        mavenCentral()
+        // ------------------------------------------------------------------
+        // 前置模组仓库：只有在 libs/ 下没有放本地 jar 时才会用到
+        // （build.gradle 会优先用 libs/*.jar，缺失时才回退到这两个坐标）。
+        // 本仓库**不打包、不转载** FTB Library（All Rights Reserved）与 Architectury 的二进制，
+        // 请让 Gradle 从这里拉取，或自行下载放进 libs/。
+        // ------------------------------------------------------------------
+        maven {
+            name = 'FTB Maven'
+            url = 'https://maven.ftb.dev/releases'
+        }
+        maven {
+            name = 'Architectury Maven'
+            url = 'https://maven.architectury.dev/'
+        }
+    }
+}
+
+rootProject.name = "better-minecraft-shop"

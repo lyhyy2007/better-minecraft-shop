@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "wood",
+      "icon": "minecraft:oak_log",
+      "items": [
+        { "item": "minecraft:oak_log", "price": 12, "sell_price": 4, "stock": -1 },
+        { "item": "minecraft:spruce_log", "price": 12, "sell_price": 4, "stock": -1 },
+        { "item": "minecraft:oak_planks", "price": 8, "sell_price": 2, "stock": -1 },
+        { "item": "minecraft:stick", "price": 4, "sell_price": 1, "stock": -1 },
+
+        {
+          "item": "minecraft:stone",
+          "price": 999,
+          "sell_price": 1,
+          "stock": -1,
+          "_comment": "故意写一条与 04-stone.json 重复的商品：石材(50) 优先级高于木材(40)，因此生效的是 04-stone.json 里 price=10 的那条。启动日志会打印去重结果，可自行删除本行。"
+        }
+      ]
+    }
+  ]
+}

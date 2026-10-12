@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "stone",
+      "icon": "minecraft:stone",
+      "items": [
+        { "item": "minecraft:stone", "price": 10, "sell_price": 3, "stock": -1 },
+        { "item": "minecraft:cobblestone", "price": 8, "sell_price": 2, "stock": -1 },
+        { "item": "minecraft:sand", "price": 6, "sell_price": 2, "stock": -1 },
+        { "item": "minecraft:sandstone", "price": 14, "sell_price": 4, "stock": -1 },
+        { "item": "minecraft:obsidian", "price": 90, "sell_price": 30, "stock": -1 }
+      ]
+    }
+  ]
+}
