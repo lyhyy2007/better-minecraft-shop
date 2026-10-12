@@ -19,30 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-## 附注 / Note
-
-本 MIT 许可仅覆盖 **本模组自身的源码与资源**（`src/`、构建脚本、文档与工具）。
-
-This MIT license covers **this mod's own source code and assets only**
-(`src/`, the build scripts, the docs and the tools).
-
-第三方前置模组**不包含在本仓库中**，也不在本许可范围内，它们各自遵循自己的许可：
-
-Third-party prerequisites are **not** included in this repository and are **not**
-covered by this license; each keeps its own license:
-
-| 前置 / Prerequisite | 许可 / License |
-|---|---|
-| FTB Library (`dev.ftb.mods:ftb-library-neoforge`) | All Rights Reserved（仅通过其公开 API / JSON 集成，未修改、未转载）/ integrated only through its public API & JSON, not modified, not redistributed |
-| Architectury API (`dev.architectury:architectury-neoforge`) | 见其仓库 / see its own repository |
-| Minecraft / NeoForge | Mojang 与 NeoForged 的各自条款 / Mojang EULA & NeoForged terms |
-
-参考学习过的第三方项目（未复制其代码）：
-
-Third-party projects that were only *studied* (no code copied):
-
-* SDMShop 3.3.1 —— 仅反编译用于缺陷分析，作为「踩坑清单」，其架构与代码均未被复制。
-* SDM-UI-Lib —— 仅参考其渲染原语清单，本模组的绘制代码为独立实现。
