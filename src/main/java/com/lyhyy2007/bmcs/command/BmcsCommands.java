@@ -313,8 +313,14 @@ public final class BmcsCommands {
     private static int debugConfig(CommandSourceStack source) {
         ShopConfig config = ShopConfig.get();
         source.sendSuccess(() -> Component.translatable(KEY + "debug.config.header", config.statistics()), false);
-        source.sendSuccess(() -> Component.translatable(KEY + "debug.config.path",
-                config.dir().toAbsolutePath().toString()), false);
+        source.sendSuccess(() -> Component.translatable(KEY + "debug.config.path.in",
+                config.buyDir().toAbsolutePath().toString()), false);
+        source.sendSuccess(() -> Component.translatable(KEY + "debug.config.path.out",
+                config.sellDir().toAbsolutePath().toString()), false);
+        if (config.hasLegacyData()) {
+            source.sendSuccess(() -> Component.translatable(KEY + "debug.config.legacy",
+                    config.legacyDir().toAbsolutePath().toString()), false);
+        }
         source.sendSuccess(() -> Component.translatable(KEY + "debug.config.priority", CategoryPriority.order()), false);
         boolean watching = ShopConfigWatcher.active();
         source.sendSuccess(() -> Component.translatable(KEY + "debug.config.watch",

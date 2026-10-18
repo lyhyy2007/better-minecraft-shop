@@ -87,6 +87,10 @@ dependencies {
 // filteringCharset 固定为 UTF-8，避免中文/俄文 lang 文件在 GBK 默认平台编码下损坏。
 processResources {
     filteringCharset = 'UTF-8'
+    // 1.0.5 起 jar 内不再携带任何默认商店配置（data/better_minecraft_shop/**）。
+    // Gradle 的增量拷贝会把上一轮输出里的空目录重新创建出来并被打进 jar，
+    // 这里显式排除，保证产物里连空的 data/ 目录都没有。
+    exclude 'data/**'
     filesMatching('META-INF/neoforge.mods.toml') {
         expand project.properties
     }

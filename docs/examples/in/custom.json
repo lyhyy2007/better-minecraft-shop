@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "categories": [
+    {
+      "id": "custom",
+      "icon": "minecraft:diamond_sword",
+      "items": [
+        { "item": "minecraft:diamond_sword", "price": 900, "stock": -1 },
+        {
+          "item": "minecraft:diamond_chestplate",
+          "price": 2400,
+          "stock": 4,
+          "components": {
+            "minecraft:enchantments": { "minecraft:protection": 4, "minecraft:mending": 1 }
+          }
+        },
+        {
+          "item": "minecraft:enchanted_book",
+          "price": 1500,
+          "stock": 8,
+          "components": {
+            "minecraft:stored_enchantments": { "minecraft:mending": 1 }
+          }
+        }
+      ]
+    }
+  ]
+}

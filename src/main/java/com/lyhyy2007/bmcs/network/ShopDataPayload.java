@@ -26,6 +26,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  *   <li>{@code openScreen}：只有「打开商店」请求的第 0 片为 true；</li>
  *   <li>{@code revision}：目录版本，用于丢弃过期分片、并让交易请求能识别旧界面；</li>
  *   <li>{@code balance}：余额（只有第 0 片有效，其余分片为 0）；</li>
+ *   <li>{@code canEdit}：当前玩家能否在界面点「新建」（服务端按 OP 权限判定，只有第 0 片有效）；</li>
  *   <li>{@code categories}：分类（只有第 0 片携带，通常远小于商品数量）；</li>
  *   <li>{@code totalEntries}：本次快照的商品总数，客户端用它做完整性校验。</li>
  * </ul>
@@ -39,6 +40,7 @@ public record ShopDataPayload(
         boolean openScreen,
         int revision,
         long balance,
+        boolean canEdit,
         int batchIndex,
         int batchCount,
         int totalEntries,
@@ -60,6 +62,7 @@ public record ShopDataPayload(
                 buffer.writeBoolean(payload.openScreen());
                 buffer.writeVarInt(payload.revision());
                 buffer.writeVarLong(payload.balance());
+                buffer.writeBoolean(payload.canEdit());
                 buffer.writeVarInt(payload.batchIndex());
                 buffer.writeVarInt(payload.batchCount());
                 buffer.writeVarInt(payload.totalEntries());
@@ -76,6 +79,7 @@ public record ShopDataPayload(
                 boolean openScreen = buffer.readBoolean();
                 int revision = buffer.readVarInt();
                 long balance = buffer.readVarLong();
+                boolean canEdit = buffer.readBoolean();
                 int batchIndex = buffer.readVarInt();
                 int batchCount = buffer.readVarInt();
                 int totalEntries = buffer.readVarInt();
@@ -106,8 +110,8 @@ public record ShopDataPayload(
                 for (int i = 0; i < entryCount; i++) {
                     entries.add(EntryData.STREAM_CODEC.decode(buffer));
                 }
-                return new ShopDataPayload(openScreen, revision, balance, batchIndex, batchCount, totalEntries,
-                        List.copyOf(categories), List.copyOf(entries));
+                return new ShopDataPayload(openScreen, revision, balance, canEdit, batchIndex, batchCount,
+                        totalEntries, List.copyOf(categories), List.copyOf(entries));
             });
 
     @Override
@@ -129,17 +133,20 @@ public record ShopDataPayload(
      * 分类（页签）。{@code displayName} 可为空，空则由客户端的分类翻译键提供名字。
      *
      * @param sellSide true 表示这是「卖出」栏位下的分类（来自 out/ 目录）
+     * @param editable true 表示这是游戏内「新建分类」创建的：可以继续往里加商品、改名、换图标
      */
-    public record CategoryData(String id, String displayName, boolean sellSide, ItemStack icon) {
+    public record CategoryData(String id, String displayName, boolean sellSide, ItemStack icon,
+                               boolean editable) {
         public static final StreamCodec<RegistryFriendlyByteBuf, CategoryData> STREAM_CODEC = StreamCodec.of(
                 (buffer, value) -> {
                     buffer.writeUtf(value.id());
                     buffer.writeUtf(value.displayName());
                     buffer.writeBoolean(value.sellSide());
                     ItemStack.STREAM_CODEC.encode(buffer, value.icon());
+                    buffer.writeBoolean(value.editable());
                 },
                 buffer -> new CategoryData(buffer.readUtf(), buffer.readUtf(), buffer.readBoolean(),
-                        ItemStack.STREAM_CODEC.decode(buffer)));
+                        ItemStack.STREAM_CODEC.decode(buffer), buffer.readBoolean()));
     }
 
     /**

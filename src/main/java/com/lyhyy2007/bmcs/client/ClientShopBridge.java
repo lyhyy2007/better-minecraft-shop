@@ -2,6 +2,7 @@ package com.lyhyy2007.bmcs.client;
 
 import com.lyhyy2007.bmcs.BetterMinecraftShop;
 import com.lyhyy2007.bmcs.network.ShopDataPayload;
+import com.lyhyy2007.bmcs.network.ShopEditorResultPayload;
 import com.lyhyy2007.bmcs.network.ShopPatchPayload;
 import dev.ftb.mods.ftblibrary.ui.ScreenWrapper;
 import net.minecraft.client.Minecraft;
@@ -55,6 +56,24 @@ public final class ClientShopBridge {
         ShopScreen screen = currentShopScreen();
         if (screen != null) {
             screen.onDataUpdated();
+        }
+    }
+
+    /**
+     * 游戏内「新建」的保存结果。
+     *
+     * <p>成功时编辑器已经自己关掉了，随后到达的商店数据会把商店重新打开；
+     * 这里只处理「编辑器还开着」的情况（失败提示 / 保存中的状态更新）。
+     */
+    public static void onEditorResult(ShopEditorResultPayload payload) {
+        if (payload.success() && payload.categoryId() != null && !payload.categoryId().isBlank()) {
+            // 新建分类 / 改名后：商店重新打开时自动选中这个分类。
+            ShopClientData.preselectCategory(payload.categoryId());
+        }
+        Screen current = Minecraft.getInstance().screen;
+        if (current instanceof ScreenWrapper wrapper
+                && wrapper.getGui() instanceof EditorResultSink editor) {
+            editor.onEditorResult(payload.success(), payload.message());
         }
     }
 

@@ -25,7 +25,8 @@ import org.slf4j.LoggerFactory;
  *       不再依赖 SDM-Economy / SDMCore / SDM-UI-Lib；</li>
  *   <li>货币走 NeoForge Data Attachment（Codec 序列化、随玩家存档、死亡不掉落），
  *       玩家余额不存放在物品堆栈上；物品数据本身全程使用 DataComponent，不碰原始 NBT；</li>
- *   <li>商品目录来自服务端多文件 JSON 配置（{@code config/better-minecraft-shop/shop_items/**.json}），
+ *   <li>商品目录来自服务端多文件 JSON 配置，买入读 {@code config/better-minecraft-shop/in/**.json}、
+ *       卖出读 {@code config/better-minecraft-shop/out/**.json}（不再生成默认配置），
  *       库存走 SavedData，全部服务端权威；</li>
  *   <li>所有交易在服务端主线程校验（数量、余额、库存、背包空间），失败即回滚并给出提示；</li>
  *   <li>客户端入口有三条：FTB Library 侧边栏按钮（背包左上角）、默认 O 键、{@code /bmcs shop}，

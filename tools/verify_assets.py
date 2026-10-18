@@ -22,7 +22,8 @@ ROOT = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
 SRC = ROOT / "src/main/java"
 RES = ROOT / "src/main/resources"
 MOD_ID = "better_minecraft_shop"
-SHOP_DIR = RES / f"data/{MOD_ID}/shop_items"
+# R2：1.0.5 起默认配置不再随 jar 发布；旧格式样例只保留在 docs/examples/ 下
+SHOP_DIR = ROOT / "docs/examples/legacy-shop_items"
 failures = []
 notes = []
 
@@ -152,18 +153,61 @@ else:
     else:
         ok("跨文件去重按优先级生效：minecraft:stone 采用石材分类（50 > 木材 40）的 10 元价")
 
-print("\n== 2) Java 里的 DEFAULT_FILE_NAMES 与资源文件一一对应 ==")
+print("\n== 2) 1.0.5 配置契约：in/ 与 out/ 分离、不再打包默认配置 ==")
 loader_java = (SRC / "com/lyhyy2007/bmcs/config/ShopConfigLoader.java").read_text(encoding="utf-8")
-block = re.search(r"DEFAULT_FILE_NAMES = List\.of\((.*?)\);", loader_java, re.S)
-if not block:
-    bad("ShopConfigLoader.java 里找不到 DEFAULT_FILE_NAMES")
-else:
-    declared = re.findall(r'"([^"]+\.json)"', block.group(1))
-    actual = [f.name for f in files]
-    if sorted(declared) == sorted(actual):
-        ok(f"DEFAULT_FILE_NAMES 与磁盘文件一致（{len(declared)} 个）")
+for token, label in (('IN_DIR = "in"', "loader 声明买入目录 in/"),
+                     ('OUT_DIR = "out"', "loader 声明卖出目录 out/"),
+                     ("FORMAT_VERSION = 2", "配置格式版本 = 2"),
+                     ("clampSellPrices", "跨目录防刷钱校验（卖价不得高于买价）")):
+    if token in loader_java:
+        ok(label)
     else:
-        bad(f"DEFAULT_FILE_NAMES 与磁盘不一致：声明 {sorted(declared)} / 实际 {sorted(actual)}")
+        bad(f"缺少 {label}（找不到 {token}）")
+for token in ("writeDefaults", "readBundled", "FALLBACK_JSON"):
+    if token in loader_java:
+        bad(f"ShopConfigLoader 仍保留 {token}（R2 要求不再向配置目录输出默认 JSON）")
+    else:
+        ok(f"已移除 {token}")
+config_java = (SRC / "com/lyhyy2007/bmcs/config/ShopConfig.java").read_text(encoding="utf-8")
+if "writeDefaults" in config_java:
+    bad("ShopConfig 仍在调用 writeDefaults")
+else:
+    ok("ShopConfig 不再写入默认配置（首启只建空的 in/ 与 out/）")
+bundled = sorted(p.name for p in (RES / f"data/{MOD_ID}/shop_items").glob("*.json"))
+if bundled:
+    bad(f"src/main/resources 里仍有默认商店配置：{bundled}")
+else:
+    ok("src/main/resources 不含任何默认商店配置")
+if (ROOT / "tools/migrate_shop_items.py").exists():
+    ok("提供旧数据迁移脚本 tools/migrate_shop_items.py（默认只预览）")
+else:
+    bad("缺少旧数据迁移脚本 tools/migrate_shop_items.py")
+
+print("\n== 2b) in/ 与 out/ 示例文件结构 ==")
+for side, required, forbidden in (("in", ("item", "price"), ("sell_price",)),
+                                  ("out", ("item", "sell_price"), ("price",))):
+    side_dir = ROOT / "docs/examples" / side
+    side_files = sorted(side_dir.glob("*.json"))
+    if not side_files:
+        bad(f"缺少 {side}/ 示例（{side_dir}）")
+        continue
+    for path in side_files:
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            bad(f"{side}/{path.name} 不是合法 JSON：{exc}")
+            continue
+        if data.get("version") != 2:
+            bad(f"{side}/{path.name} 的 version 不是 2：{data.get('version')}")
+        for cat in data.get("categories", []):
+            for entry in cat.get("items", []):
+                missing = [f for f in required if f not in entry]
+                if missing:
+                    bad(f"{side}/{path.name} 的 {entry.get('item')} 缺少 {missing}")
+                extra = [f for f in forbidden if f in entry]
+                if extra:
+                    bad(f"{side}/{path.name} 的 {entry.get('item')} 不该出现 {extra}（买卖字段已分家）")
+    ok(f"{side}/ 示例 {len(side_files)} 个文件，字段符合买卖分离")
 if "MAX_FILE_BYTES = 10L * 1024 * 1024" in loader_java:
     ok("单文件 10MB 上限存在")
 else:
@@ -487,7 +531,9 @@ readme = (ROOT / "README.md").read_text(encoding="utf-8") if (ROOT / "README.md"
 if not readme:
     bad("缺少 README.md")
 else:
-    for phrase, label in (("shop_items/", "多文件配置目录"),
+    for phrase, label in (("in/", "买入目录 in/"),
+                         ("out/", "卖出目录 out/"),
+                         ("新建", "GUI 新建编辑器"),
                          ("O 键", "键位绑定"),
                          ("虚拟滚动", "虚拟滚动"),
                          ("热重载", "热重载"),

@@ -76,7 +76,7 @@ public final class ShopDataCache {
         Map<UUID, ItemStack> builtTemplates = new LinkedHashMap<>();
         for (ShopCategory category : source) {
             built.add(new ShopDataPayload.CategoryData(category.id(), category.displayName(),
-                    category.side() == ShopSide.SELL, category.icon().copy()));
+                    category.side() == ShopSide.SELL, category.icon().copy(), category.editable()));
             for (ShopItemEntry entry : category.items()) {
                 // 网络包里每一项都必须是「1 件」的独立副本：模板本身不参与交易。
                 builtTemplates.put(entry.id(), entry.template().copyWithCount(1));

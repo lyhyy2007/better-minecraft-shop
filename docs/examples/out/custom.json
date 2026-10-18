@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "categories": [
+    {
+      "id": "custom",
+      "icon": "minecraft:diamond",
+      "items": [
+        { "item": "minecraft:diamond_sword", "sell_price": 300 },
+        { "item": "minecraft:diamond_chestplate", "sell_price": 800 },
+        {
+          "item": "minecraft:enchanted_book",
+          "sell_price": 500,
+          "components": {
+            "minecraft:stored_enchantments": { "minecraft:mending": 1 }
+          }
+        }
+      ]
+    }
+  ]
+}

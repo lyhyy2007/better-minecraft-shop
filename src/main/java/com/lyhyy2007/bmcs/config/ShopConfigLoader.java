@@ -12,7 +12,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,15 +37,19 @@ import net.minecraft.world.item.Items;
 /**
  * 多文件商店配置加载器。
  *
- * <p>目录：{@code config/better-minecraft-shop/shop_items/**.json}（可递归子目录），用的是第一版的
- * 单层结构：一条商品里同时写 {@code price} 与 {@code sell_price}。
+ * <p>目录（两个都直接位于 {@code config/better-minecraft-shop/} 下，都可递归子目录）：
  * <ul>
- *   <li>界面左侧「买入」栏位：用 {@code price} 结算，并展示 {@code stock}（限量）；</li>
- *   <li>界面左侧「卖出」栏位：用 {@code sell_price} 结算，卖出不限量；</li>
- *   <li>兼容：老版本单文件 {@code config/better-minecraft-shop/shop_items.json} 同样会被读取。</li>
+ *   <li>{@code in/**.json}：玩家<b>买入</b>的商品。每条写 {@code item} + {@code price}
+ *       （必填，&gt;= 1），可选 {@code stock}（{@code -1} = 不限量）与 {@code components}（附魔）；</li>
+ *   <li>{@code out/**.json}：玩家<b>卖出</b>的商品。每条写 {@code item} + {@code sell_price}
+ *       （必填，&gt;= 1），可选 {@code components}；卖出不限量，不读 {@code stock}。</li>
  * </ul>
- * 同一份配置会为两个方向各解析一条商品（同一物品可以在买入 / 卖出栏位里各出现一次），
- * 两个方向各自去重、各自定价，互不影响。
+ * 两个目录各自独立：同名分类、同一物品可以在买入 / 卖出栏位里各出现一次，
+ * 两个方向各自去重、各自定价，互不影响。加载器<b>不会</b>向配置目录写出任何默认 JSON ——
+ * 两个目录都为空时，商店就是空的。
+ *
+ * <p>防刷钱：同一物品（含附魔签名）同时出现在 in/ 与 out/ 时，如果 out/ 的回收价高于
+ * in/ 的买入价，加载阶段会把回收价压回买入价并在日志里说明，避免「买进立刻卖出」套利。
  *
  * <p>健壮性设计（这是相对 SDMShop 那套「一坨 NBT / 一次解析失败整份坏档」的核心改进）：
  * <ol>
@@ -69,23 +72,24 @@ import net.minecraft.world.item.Items;
  * {@code minecraft:stored_enchantments}）；其它组件键会被忽略并打印提示，不再支持改名、lore 等。
  */
 public final class ShopConfigLoader {
-    /** 配置格式版本。 */
-    public static final int FORMAT_VERSION = 1;
+    /** 配置格式版本：1 = 旧版单层结构，2 = in/ 与 out/ 分目录结构（当前）。 */
+    public static final int FORMAT_VERSION = 2;
     /** 单文件体积上限：10MB。超过直接拒绝加载。 */
     public static final long MAX_FILE_BYTES = 10L * 1024 * 1024;
     /** 分类数量上限（同时也是网络包的分类上限）。 */
     public static final int MAX_CATEGORIES = 256;
     /** 商品总条目上限：10000 条需求留出 6 倍余量。 */
     public static final int MAX_ITEMS = 65536;
-    /** 首次启动从 mod 资源里复制出去的默认配置文件名。 */
-    public static final List<String> DEFAULT_FILE_NAMES = List.of(
-            "01-weapons_tools.json", "02-hardware.json", "03-building.json", "04-stone.json",
-            "05-wood.json", "06-material.json", "07-food.json", "08-seeds.json");
-    public static final String BUNDLED_DIR = "shop_items";
+    /** 买入目录名：直接位于 {@code config/better-minecraft-shop/} 下。 */
+    public static final String IN_DIR = "in";
+    /** 卖出目录名：直接位于 {@code config/better-minecraft-shop/} 下。 */
+    public static final String OUT_DIR = "out";
+    /** 旧版商品目录名：只用于检测并提示迁移，不再读取、不会删除。 */
+    public static final String LEGACY_DIR = "shop_items";
+    /** 旧版单文件名：只用于检测并提示迁移，不再读取、不会删除。 */
+    public static final String LEGACY_FILE = "shop_items.json";
     /** 卖出商品在 {@code byKey} 里的键前缀，避免和买入的 {@code 分类.序号} 撞车。 */
     private static final String SELL_KEY_PREFIX = "sell.";
-    /** 内置资源全部读取失败时写出的最小配置文件。 */
-    public static final String FALLBACK_FILE_NAME = "00-minimal.json";
 
     private static final int MAX_LOGGED_ERRORS = 40;
     private static final int MAX_LOGGED_DUPLICATES = 12;
@@ -137,28 +141,29 @@ public final class ShopConfigLoader {
      *
      * <p>本方法不修改任何全局状态，也不会因为文件损坏而抛出异常——失败信息都在日志里。
      */
-    public static Result load(Path dir, Path legacyFile, HolderLookup.Provider registries) {
+    public static Result load(Path buyDir, Path sellDir, HolderLookup.Provider registries) {
         long start = System.nanoTime();
         duplicatesLogged = 0;
         entryLogsWritten = 0;
         RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registries);
 
         Map<String, PendingCategory> categories = new LinkedHashMap<>();
-        // 去重按方向各管各的：同一条配置会在买入、卖出各生成一条商品，两者互不冲突。
+        // 去重按方向各管各的：in/ 与 out/ 是两份独立目录，同名分类在两边各占一项。
         DedupRegistry buyDedup = new DedupRegistry();
         DedupRegistry sellDedup = new DedupRegistry();
         int skipped = 0;
         int files = 0;
 
-        List<Path> paths = collectFiles(dir);
-        // 兼容老版本单文件：内容结构与目录里的配置一样，一条物品同时带买入价与回收价。
-        if (legacyFile != null && Files.isRegularFile(legacyFile) && !containsPath(paths, legacyFile)) {
-            paths.add(legacyFile);
-        }
-        for (Path file : paths) {
+        for (Path file : collectFiles(buyDir)) {
             files++;
-            skipped += parseAndMerge(file, categories, buyDedup, sellDedup, ops);
+            skipped += parseAndMerge(file, ShopSide.BUY, categories, buyDedup, ops);
         }
+        for (Path file : collectFiles(sellDir)) {
+            files++;
+            skipped += parseAndMerge(file, ShopSide.SELL, categories, sellDedup, ops);
+        }
+        // 两个目录都解析完之后再做跨目录的防刷钱校验（out/ 的回收价不得高于 in/ 的买入价）。
+        clampSellPrices(categories);
 
         List<ShopCategory> outCategories = new ArrayList<>(categories.size());
         List<ShopItemEntry> outEntries = new ArrayList<>();
@@ -195,15 +200,15 @@ public final class ShopConfigLoader {
                 outEntries.add(entry);
             }
             if (items.isEmpty()) {
-                // 分类里的条目要么全部非法、要么都被更高优先级的分类抢走了：
-                // 与其在界面上留一个空页签，不如不显示，并在日志里说清楚。
+                // 空分类照样保留（需求：新建分类后必须能在页签里选中它再加商品），
+                // 只记一条日志说明为什么是空的。
                 emptyCategories.add(pending.id);
-                continue;
             }
-            outCategories.add(new ShopCategory(pending.side, pending.id, pending.displayName, pending.icon, items));
+            outCategories.add(new ShopCategory(pending.side, pending.id, pending.displayName, pending.icon, items,
+                    pending.editable));
         }
         if (!emptyCategories.isEmpty()) {
-            BetterMinecraftShop.LOGGER.info("[{}] 以下分类没有任何可用商品（条目非法或被更高优先级分类占用），已不显示：{}",
+            BetterMinecraftShop.LOGGER.info("[{}] 以下分类暂时没有任何可用商品（仍是空分类，页面照常显示）：{}",
                     BetterMinecraftShop.MOD_NAME, emptyCategories);
         }
 
@@ -221,16 +226,15 @@ public final class ShopConfigLoader {
     }
 
     /**
-     * 解析单个配置文件：只读一次、只解析一次 JSON，然后按买入 / 卖出各合并一遍。
+     * 解析单个配置文件：in/ 目录只按买入解析，out/ 目录只按卖出解析。
      *
-     * <p>一条配置会在两个方向各生成一条商品：买入条目取 {@code price} + {@code stock}，
-     * 卖出条目取 {@code sell_price}；两边各自去重，互不影响。
+     * <p>两个目录互不交叉：in/ 里写了 {@code sell_price} 不会被当成卖出商品，
+     * out/ 里写了 {@code price} 也不会被当成买入商品（两种写错目录的字段都会在日志里提示）。
      *
      * @return 被跳过的文件 / 条目数
      */
-    private static int parseAndMerge(Path file, Map<String, PendingCategory> categories,
-                                     DedupRegistry buyDedup, DedupRegistry sellDedup,
-                                     RegistryOps<JsonElement> ops) {
+    private static int parseAndMerge(Path file, ShopSide side, Map<String, PendingCategory> categories,
+                                     DedupRegistry dedup, RegistryOps<JsonElement> ops) {
         try {
             long size = Files.size(file);
             if (size <= 0L) {
@@ -258,14 +262,9 @@ public final class ShopConfigLoader {
                 BetterMinecraftShop.LOGGER.warn("[{}] {} 的 version={}，本模组当前支持 {}，将按 {} 解析",
                         BetterMinecraftShop.MOD_NAME, file.getFileName(), version, FORMAT_VERSION, FORMAT_VERSION);
             }
-            int skipped = 0;
-            FileParse buy = parseFile(file, root, ops, ShopSide.BUY);
-            mergeInto(categories, buy.categories(), buyDedup);
-            skipped += buy.skipped();
-            FileParse sell = parseFile(file, root, ops, ShopSide.SELL);
-            mergeInto(categories, sell.categories(), sellDedup);
-            skipped += sell.skipped();
-            return skipped;
+            FileParse parse = parseFile(file, root, ops, side);
+            mergeInto(categories, parse.categories(), dedup);
+            return parse.skipped();
         } catch (IOException e) {
             // 读取失败（权限 / 文件被占用）：只丢这个文件。
             logEntry(true, "读取配置文件失败，已跳过：{}｜{}", file, e.toString());
@@ -277,61 +276,47 @@ public final class ShopConfigLoader {
         }
     }
 
-    /** 目录扫描结果里是否已经包含这个文件（用于避免老版本单文件被读两遍）。 */
-    private static boolean containsPath(List<Path> paths, Path target) {
-        Path normalized = target.toAbsolutePath().normalize();
-        for (Path path : paths) {
-            if (path.toAbsolutePath().normalize().equals(normalized)) {
-                return true;
+    /**
+     * 跨目录防刷钱：out/ 里的回收价不得高于 in/ 里同一物品（含附魔签名）的买入价。
+     *
+     * <p>分目录之后，「卖出价高于买入价」不再能在单条配置里发现，必须在两份目录都解析完之后
+     * 按判重键对一遍。被压价的条目只改价格，不丢弃。
+     *
+     * @return 被压价的条目数
+     */
+    private static int clampSellPrices(Map<String, PendingCategory> categories) {
+        Map<String, Integer> buyPrices = new LinkedHashMap<>();
+        for (PendingCategory pending : categories.values()) {
+            if (pending.side != ShopSide.BUY) {
+                continue;
+            }
+            for (Candidate candidate : pending.items) {
+                buyPrices.putIfAbsent(candidate.dedupKey(), candidate.price());
             }
         }
-        return false;
-    }
-
-    /**
-     * 把内置默认配置写到配置目录（仅在目录里一个 JSON 都没有时调用）。
-     *
-     * @return 实际写出的文件名
-     */
-    public static List<String> writeDefaults(Path dir) {
-        List<String> written = new ArrayList<>();
-        try {
-            Files.createDirectories(dir);
-        } catch (IOException e) {
-            BetterMinecraftShop.LOGGER.error("[{}] 无法创建配置目录：{}", BetterMinecraftShop.MOD_NAME, dir, e);
-            return written;
+        if (buyPrices.isEmpty()) {
+            return 0;
         }
-        for (String name : DEFAULT_FILE_NAMES) {
-            Path target = dir.resolve(name);
-            try {
-                String text = readBundled(name);
-                if (text == null) {
-                    BetterMinecraftShop.LOGGER.error("[{}] 内置默认配置缺失，无法写出 {}（jar 是否完整？）",
-                            BetterMinecraftShop.MOD_NAME, name);
+        int clamped = 0;
+        for (PendingCategory pending : categories.values()) {
+            if (pending.side != ShopSide.SELL) {
+                continue;
+            }
+            for (int i = 0; i < pending.items.size(); i++) {
+                Candidate candidate = pending.items.get(i);
+                Integer buyPrice = buyPrices.get(candidate.dedupKey());
+                if (buyPrice == null || candidate.sellPrice() <= buyPrice) {
                     continue;
                 }
-                Files.writeString(target, text, StandardCharsets.UTF_8);
-                written.add(name);
-            } catch (IOException e) {
-                BetterMinecraftShop.LOGGER.error("[{}] 写出默认配置失败：{}", BetterMinecraftShop.MOD_NAME, target, e);
+                logEntry(false, "{} 的 sell_price({}) 高于 in/ 里同一物品的 price({})，已压回买入价，避免刷钱",
+                        candidate.source(), candidate.sellPrice(), buyPrice);
+                pending.items.set(i, new Candidate(candidate.dedupKey(), candidate.template(), candidate.price(),
+                        buyPrice, candidate.stock(), candidate.customComponents(), candidate.priority(),
+                        candidate.source()));
+                clamped++;
             }
         }
-        if (!written.isEmpty()) {
-            BetterMinecraftShop.LOGGER.info("[{}] 已生成默认配置 {} 个文件：{}",
-                    BetterMinecraftShop.MOD_NAME, written.size(), dir.toAbsolutePath());
-            return written;
-        }
-        // 兜底：连内置资源配置都读不到（jar 损坏 / 打包异常）时，也不要让新服主面对一个空商店。
-        Path fallback = dir.resolve(FALLBACK_FILE_NAME);
-        try {
-            Files.writeString(fallback, FALLBACK_JSON, StandardCharsets.UTF_8);
-            written.add(FALLBACK_FILE_NAME);
-            BetterMinecraftShop.LOGGER.warn("[{}] 未能读取内置默认配置，已写出最小可用配置：{}",
-                    BetterMinecraftShop.MOD_NAME, fallback.toAbsolutePath());
-        } catch (IOException e) {
-            BetterMinecraftShop.LOGGER.error("[{}] 写出最小配置也失败了：{}", BetterMinecraftShop.MOD_NAME, fallback, e);
-        }
-        return written;
+        return clamped;
     }
 
     // ------------------------------------------------------------------
@@ -433,8 +418,13 @@ public final class ShopConfigLoader {
                 // 去重统一在全局注册表里做（跨文件、跨分类），见 DedupRegistry。
                 candidates.add(value);
             }
+            // editable：游戏内「新建分类」写下的标记；手写 JSON 不写就是 false（不可在游戏内改）。
+            boolean editable = categoryObject.has("editable")
+                    && categoryObject.get("editable").isJsonPrimitive()
+                    && categoryObject.get("editable").getAsJsonPrimitive().isBoolean()
+                    && categoryObject.get("editable").getAsBoolean();
             categories.add(new PendingCategory(side, categoryId, categoryName,
-                    resolveIcon(readString(categoryObject, "icon")), priority, candidates));
+                    resolveIcon(readString(categoryObject, "icon")), priority, editable, candidates));
         }
         return new FileParse(List.copyOf(categories), skipped);
     }
@@ -494,15 +484,17 @@ public final class ShopConfigLoader {
             logEntry(true, "{} 的物品不存在或是空气：{}", where, itemId);
             return Optional.empty();
         }
-        // 买入与卖出的价格各读各的列，互不影响：买入栏位只认 price，
-        // 卖出栏位只认 sell_price（没写时才退回 price）。同一条配置解析两次，各取所需。
+        // in/ 与 out/ 各认各的字段：in/ 只认 price（+stock），out/ 只认 sell_price。
         int price;
         int sellPrice;
         int stock;
         if (side == ShopSide.BUY) {
             if (raw.price() < 1) {
-                logEntry(true, "{} 的 price 必须 >= 1（当前 {}），买入栏位已跳过该条", where, raw.price());
+                logEntry(true, "{} 的 price 必须 >= 1（当前 {}），in/ 里的买入条目已跳过", where, raw.price());
                 return Optional.empty();
+            }
+            if (raw.sellPrice() > 0) {
+                logEntry(false, "{} 位于 in/（买入）目录，sell_price 不生效：卖出价请写进 out/", where);
             }
             price = raw.price();
             sellPrice = 0;
@@ -512,20 +504,18 @@ public final class ShopConfigLoader {
                 stock = ShopItemEntry.UNLIMITED;
             }
         } else {
-            int payout = raw.sellPrice() > 0 ? raw.sellPrice() : raw.price();
-            if (payout < 1) {
-                logEntry(true, "{} 没有有效回收价（sell_price 或 price 至少要有一个 >= 1），卖出栏位已跳过该条",
-                        where);
+            if (raw.price() > 0) {
+                logEntry(false, "{} 位于 out/（卖出）目录，price 不生效：卖出价请写 sell_price", where);
+            }
+            if (raw.sellPrice() < 1) {
+                logEntry(true, "{} 缺少有效的 sell_price（out/ 里的卖出条目必须 >= 1），已跳过该条", where);
                 return Optional.empty();
             }
-            if (raw.price() >= 1 && payout > raw.price()) {
-                // 回收价高于买入价 = 无限刷钱：沿用第一版的规则压回买入价。
-                logEntry(false, "{} 的 sell_price({}) 高于 price({})，已压回 {}，避免刷钱",
-                        where, raw.sellPrice(), raw.price(), raw.price());
-                payout = raw.price();
+            if (raw.stock() != ShopItemEntry.UNLIMITED) {
+                logEntry(false, "{} 位于 out/（卖出）目录，stock 不生效：卖出不限量", where);
             }
             price = 0;
-            sellPrice = payout;
+            sellPrice = raw.sellPrice();
             // 卖出方向是「玩家把东西卖回商店」，不限制商店库存。
             stock = ShopItemEntry.UNLIMITED;
         }
@@ -576,7 +566,7 @@ public final class ShopConfigLoader {
                 // 新分类：先建一个空的归属容器挂进总表，再由注册表逐条决定去留
                 //（可能出现「这条已经被别的分类占用了」的情况）。
                 existing = new PendingCategory(category.side, category.id, category.displayName, category.icon,
-                        category.priority, List.of());
+                        category.priority, category.editable, List.of());
                 categories.put(mapKey, existing);
             } else {
                 if (existing.displayName.isEmpty() && !category.displayName.isEmpty()) {
@@ -584,6 +574,9 @@ public final class ShopConfigLoader {
                 }
                 if (existing.icon.isEmpty() && !category.icon.isEmpty()) {
                     existing.icon = category.icon;
+                }
+                if (category.editable) {
+                    existing.editable = true;
                 }
                 if (existing.priority != category.priority) {
                     BetterMinecraftShop.LOGGER.warn("[{}] 分类 {} 在多份配置里的 priority 不一致（{} vs {}），"
@@ -724,49 +717,9 @@ public final class ShopConfigLoader {
         return UUID.nameUUIDFromBytes(("better-minecraft-shop:" + key).getBytes(StandardCharsets.UTF_8));
     }
 
-    /** 读取打包在 jar 里的默认配置（开发期读 build/resources/main，生产期读 mod jar）。 */
-    private static String readBundled(String name) {
-        String resourcePath = "data/" + BetterMinecraftShop.MOD_ID + "/" + BUNDLED_DIR + "/" + name;
-        // 1) 本类所在 mod 的类加载器（NeoForge 把 mod jar 放在类路径上，开发期则是 build/resources/main）
-        try (InputStream in = ShopConfigLoader.class.getClassLoader().getResourceAsStream(resourcePath)) {
-            if (in != null) {
-                return new String(in.readAllBytes(), StandardCharsets.UTF_8);
-            }
-        } catch (IOException e) {
-            BetterMinecraftShop.LOGGER.error("[{}] 读取默认配置失败：{}", BetterMinecraftShop.MOD_NAME, resourcePath, e);
-        }
-        // 2) 兜底：以绝对路径再试一次
-        try (InputStream in = ShopConfigLoader.class.getResourceAsStream("/" + resourcePath)) {
-            if (in != null) {
-                return new String(in.readAllBytes(), StandardCharsets.UTF_8);
-            }
-        } catch (IOException e) {
-            BetterMinecraftShop.LOGGER.error("[{}] 读取默认配置失败：/{}", BetterMinecraftShop.MOD_NAME, resourcePath, e);
-        }
-        return null;
-    }
-
     // ------------------------------------------------------------------
     // 内部数据结构
     // ------------------------------------------------------------------
-
-    /** 内置资源不可用时的最小可用配置（故意不含任何 components，确保一定能解析成功）。 */
-    private static final String FALLBACK_JSON = """
-            {
-              "version": 1,
-              "categories": [
-                {
-                  "id": "material",
-                  "icon": "minecraft:iron_ingot",
-                  "items": [
-                    { "item": "minecraft:stone", "price": 10, "sell_price": 3, "stock": -1 },
-                    { "item": "minecraft:iron_ingot", "price": 120, "sell_price": 40, "stock": -1 },
-                    { "item": "minecraft:bread", "price": 20, "sell_price": 6, "stock": -1 }
-                  ]
-                }
-              ]
-            }
-            """;
 
     private record RawItem(String item, String deprecatedDisplayName, int price, int sellPrice,
                            int stock, DataComponentPatch components) {
@@ -785,14 +738,16 @@ public final class ShopConfigLoader {
         private final List<Candidate> items;
         private String displayName;
         private ItemStack icon;
+        private boolean editable;
 
         private PendingCategory(ShopSide side, String id, String displayName, ItemStack icon, int priority,
-                                List<Candidate> items) {
+                                boolean editable, List<Candidate> items) {
             this.side = side;
             this.id = id;
             this.displayName = displayName;
             this.icon = icon;
             this.priority = priority;
+            this.editable = editable;
             // 解析阶段的条目先装在一个独立可变列表里，接受与否由 DedupRegistry 决定。
             this.items = new ArrayList<>(items);
         }

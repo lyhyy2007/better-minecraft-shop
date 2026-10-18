@@ -11,16 +11,22 @@ import net.minecraft.world.item.ItemStack;
  *
  * @param side        该分类属于买入还是卖出
  * @param id          分类 id（同一方向内唯一）
- * @param displayName 展示名，支持翻译键；空串表示直接用 id
+ * @param displayName 展示名，支持翻译键；空串表示「未命名」（由客户端显示占位文字）
  * @param icon        页签图标物品（空堆栈表示无图标）
- * @param items       该分类下的商品
+ * @param items       该分类下的商品（可以为空：新建分类在建好商品之前就该出现在页签里）
+ * @param editable    是否是游戏内「新建分类」创建的（只有这类分类才允许继续加商品 / 改名 / 换图标）
  */
 public record ShopCategory(ShopSide side, String id, String displayName, ItemStack icon,
-                           List<ShopItemEntry> items) {
+                           List<ShopItemEntry> items, boolean editable) {
     public ShopCategory {
         if (side == null) {
             side = ShopSide.BUY;
         }
         items = List.copyOf(items);
+    }
+
+    /** 兼容旧调用：手写 JSON 里的分类一律不可游戏内编辑。 */
+    public ShopCategory(ShopSide side, String id, String displayName, ItemStack icon, List<ShopItemEntry> items) {
+        this(side, id, displayName, icon, items, false);
     }
 }

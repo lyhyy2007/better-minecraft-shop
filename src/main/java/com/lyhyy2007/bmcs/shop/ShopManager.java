@@ -128,6 +128,8 @@ public final class ShopManager {
         }
         int revision = ShopConfig.get().revision();
         long balance = viewer == null ? 0L : DeepCoinCurrency.balance(viewer);
+        // 「新建」入口只对有权限的玩家可见；界面只做展示，真正的权限校验在服务端保存时再做一次。
+        boolean canEdit = viewer != null && ShopItemEditorService.canEdit(viewer);
         List<ShopDataPayload.CategoryData> categoryData = ShopDataCache.get().categories(revision);
         List<ShopItemEntry> entries = ShopConfig.get().entries();
 
@@ -156,6 +158,7 @@ public final class ShopManager {
                     openScreen && batch == 0,
                     revision,
                     batch == 0 ? balance : 0L,
+                    batch == 0 && canEdit,
                     batch,
                     batchCount,
                     entries.size(),
@@ -243,5 +246,35 @@ public final class ShopManager {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             refresh(player);
         }
+    }
+
+    /**
+     * 游戏内「新建」保存成功后重载配置：保存者重新打开商店，其余玩家只刷新已有列表。
+     *
+     * @param saver 刚保存商品的玩家
+     * @return 配置是否加载成功（失败时调用方会把原因回给玩家）
+     */
+    public boolean reloadFromEditor(ServerPlayer saver) {
+        MinecraftServer server = saver.server;
+        if (server == null) {
+            return false;
+        }
+        boolean ok = ShopConfig.get().load(server.registryAccess());
+        if (ok) {
+            ShopDataCache.get().invalidate();
+            if (stock != null) {
+                stock.syncWithConfig(ShopConfig.get().entries(), ShopConfig.get().revision());
+            }
+        }
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (player != saver) {
+                refresh(player);
+            }
+        }
+        if (ok) {
+            // 编辑器这时正在关闭：紧接着的一包会把商店界面重新打开，玩家看到的就是刚存进去的商品。
+            openShop(saver);
+        }
+        return ok;
     }
 }

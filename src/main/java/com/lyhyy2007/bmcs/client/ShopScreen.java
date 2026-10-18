@@ -7,6 +7,7 @@ import com.lyhyy2007.bmcs.config.ShopSide;
 import com.lyhyy2007.bmcs.currency.DeepCoinCurrency;
 import com.lyhyy2007.bmcs.network.ShopActionPayload;
 import com.lyhyy2007.bmcs.network.ShopDataPayload;
+import com.lyhyy2007.bmcs.network.ShopItemDeletePayload;
 import com.lyhyy2007.bmcs.util.ItemNameUtil;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -29,6 +30,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -72,6 +74,11 @@ public class ShopScreen extends BaseScreen {
     private final IntTextBox quantityBox;
     private final SimpleTextButton buyButton;
     private final SimpleTextButton sellButton;
+    /** 右上角「新建分类」：只在编辑模式下出现。 */
+    private final SimpleTextButton createCategoryButton;
+
+    /** 正在从商店界面切到编辑器：此时 onClosed() 不能丢掉刚加载的商店快照。 */
+    private boolean openingEditor;
 
     public ShopScreen() {
         super();
@@ -104,6 +111,14 @@ public class ShopScreen extends BaseScreen {
                 Component.translatable(KEY + "sell"), Icons.BIN,
                 button -> submit(ShopActionPayload.Action.SELL),
                 Component.translatable(KEY + "sell.tip"));
+
+        // 右上角只有「新建分类」一个入口：挂在屏幕本体上（不在 footer），位置紧挨搜索框左侧。
+        // 只在服务端下发 can_edit 且处于编辑模式时才 add 到界面，普通玩家完全看不到。
+        // 「新建商品」不占顶栏，而是编辑模式下商品网格里的第一格（见 GridPanel）。
+        this.createCategoryButton = SimpleTextButton.create(this,
+                Component.translatable(KEY + "editor.open"), Icons.ADD,
+                button -> openCategoryEditor(),
+                Component.translatable(KEY + "editor.open.tip"));
     }
 
     // ------------------------------------------------------------------
@@ -123,12 +138,19 @@ public class ShopScreen extends BaseScreen {
         add(gridPanel);
         add(scrollBar);
         add(footerPanel);
+        if (ShopClientData.canEdit() && ShopClientData.editMode()) {
+            add(createCategoryButton);
+        }
         add(searchBox);
     }
 
     @Override
     public void alignWidgets() {
-        searchBox.setPosAndSize(width - 124, 10, 116, 16);
+        // 右上角：搜索框贴边（宽 116），左边是「新建分类」（仅编辑模式存在），间隔 6px。
+        int searchX = Math.max(0, width - 124);
+        searchBox.setPosAndSize(searchX, 10, 116, 16);
+        int buttonWidth = 76;
+        createCategoryButton.setPosAndSize(Math.max(PAD, searchX - 6 - buttonWidth), 10, buttonWidth, 16);
 
         int bodyX = PAD + SIDE_W + PAD;
         int bodyW = Math.max(1, width - bodyX - PAD);
@@ -137,7 +159,11 @@ public class ShopScreen extends BaseScreen {
 
         tabsPanel.setPosAndSize(bodyX, HEADER_H, bodyW, TABS_H);
 
-        int gridY = HEADER_H + TABS_H + PAD;
+        // 分类页签按文字实际长度排版：一行放不下就换行，页签栏高度随之变高，商品网格下移。
+        int tabsH = Math.max(TABS_H, tabsPanel.requiredHeight(bodyW));
+        tabsPanel.setPosAndSize(bodyX, HEADER_H, bodyW, tabsH);
+
+        int gridY = HEADER_H + tabsH + PAD;
         int gridH = Math.max(1, height - gridY - FOOTER_H - PAD * 3);
         int gridW = Math.max(1, bodyW - SCROLL_W);
         gridPanel.setPosAndSize(bodyX, gridY, gridW, gridH);
@@ -173,8 +199,127 @@ public class ShopScreen extends BaseScreen {
         if (ShopClientData.hasData()) {
             Component counter = Component.translatable(KEY + "counter",
                     ShopClientData.sideEntryCount(), ShopClientData.filtered().size());
-            theme.drawString(graphics, counter.getString(), x + 150, y + 18, Color4I.rgb(0x9AA6B8), Theme.SHADOW);
+            // 顶栏右侧已经被「两个新建按钮 + 搜索框」占掉约 270px，计数文本在窄窗口下要截断，不能压上去。
+            int counterWidth = Math.max(40,
+                    width - 150 - (ShopClientData.canEdit() && ShopClientData.editMode() ? 300 : 8));
+            theme.drawString(graphics, theme.trimStringToWidth(counter.getString(), counterWidth),
+                    x + 150, y + 18, Color4I.rgb(0x9AA6B8), Theme.SHADOW);
         }
+    }
+
+    /** 右上角「新建」：先建一个分类（文件名 = 分类名），建好会自动选中它。 */
+    private void openCategoryEditor() {
+        openingEditor = true;
+        new ShopCategoryEditorScreen(ShopClientData.side(), "", "", "", ShopClientData.revision()).openGui();
+    }
+
+    /**
+     * 右上角「新建商品」：只有当前选中的是「游戏内新建的分类」才可用。
+     *
+     * <p>手写 JSON 里的分类不写 {@code editable:true}，游戏内不会往里加东西
+     * （避免把服主手写的文件改乱）；先「新建分类」再往里加商品即可。
+     */
+    private void openEditor() {
+        Optional<ShopDataPayload.CategoryData> category = ShopClientData.editableSelectedCategory();
+        if (category.isEmpty()) {
+            ShopClientData.setStatus(Component.translatable(KEY + "status.need_category"));
+            return;
+        }
+        openingEditor = true;
+        ShopDataPayload.CategoryData data = category.get();
+        new ShopItemEditorScreen(ShopClientData.side(), data.id(),
+                ItemNameUtil.categoryName(data.displayName(), data.id()).getString(),
+                ShopClientData.revision()).openGui();
+    }
+
+    /**
+     * 编辑模式下、且当前选中的是「游戏内新建的可编辑分类」时，商品网格第一位显示「新建商品」格。
+     *
+     * <p>没选中可编辑分类（例如停在「全部」页签，或选的是手写 JSON 的分类）时这一格直接不出现，
+     * 避免点了才提示。
+     */
+    private boolean showCreateTile() {
+        return ShopClientData.canEdit() && ShopClientData.editMode() && ShopClientData.editableSelectedCategory().isPresent();
+    }
+
+    /** 左侧「编辑模式」开关：打开后才能删商品；改分类名/换图标用页签右键。 */
+    private void toggleEditMode() {
+        if (!ShopClientData.canEdit()) {
+            return;
+        }
+        boolean next = !ShopClientData.editMode();
+        ShopClientData.setEditMode(next);
+        ShopClientData.setStatus(Component.translatable(KEY + (next ? "edit.on" : "edit.off")));
+        // 侧栏按钮的文字要跟着状态立刻换（"编辑模式"/"退出编辑"）。
+        sidePanel.updateEditLabel();
+        // 「新建分类」按钮与网格里的「新建商品」格子都只在编辑模式出现，必须整屏重建一次。
+        refreshWidgets();
+        tabsPanel.refreshWidgets();
+        gridPanel.refreshWidgets();
+    }
+
+    /**
+     * 编辑模式下右键分类页签：改显示名 / 换图标（只有游戏内新建的分类可改）。
+     */
+    private void openCategoryEditorFor(String id) {
+        if (!ShopClientData.canEdit()) {
+            return;
+        }
+        if (!ShopClientData.editMode()) {
+            ShopClientData.setStatus(Component.translatable(KEY + "status.need_edit_mode"));
+            return;
+        }
+        ShopDataPayload.CategoryData data = null;
+        for (ShopDataPayload.CategoryData candidate : ShopClientData.categories()) {
+            if (candidate.id().equals(id)) {
+                data = candidate;
+                break;
+            }
+        }
+        if (data == null) {
+            return;
+        }
+        if (!data.editable()) {
+            ShopClientData.setStatus(Component.translatable(KEY + "status.category_locked"));
+            return;
+        }
+        openingEditor = true;
+        new ShopCategoryEditorScreen(ShopClientData.side(), data.id(),
+                ItemNameUtil.categoryName(data.displayName(), data.id()).getString(),
+                iconIdOf(data.icon()), ShopClientData.revision()).openGui();
+    }
+
+    private static String iconIdOf(ItemStack icon) {
+        if (icon == null || icon.isEmpty()) {
+            return "";
+        }
+        return BuiltInRegistries.ITEM.getKey(icon.getItem()).toString();
+    }
+
+    /** 编辑模式下左键商品：先弹确认框，确认后才真正删（删除是不可逆操作）。 */
+    private void confirmDelete(ShopDataPayload.EntryData entry) {
+        if (!ShopClientData.canEdit()) {
+            return;
+        }
+        boolean editable = false;
+        for (ShopDataPayload.CategoryData category : ShopClientData.categories()) {
+            if (category.id().equals(entry.categoryId()) && category.editable()) {
+                editable = true;
+                break;
+            }
+        }
+        if (!editable) {
+            ShopClientData.setStatus(Component.translatable(KEY + "status.category_locked"));
+            return;
+        }
+        openingEditor = true;
+        new ShopConfirmScreen(
+                Component.translatable(KEY + "confirm.delete", plainNameOf(entry)),
+                () -> {
+                    PacketDistributor.sendToServer(new ShopItemDeletePayload(
+                            ShopClientData.side(), entry.categoryId(), entry.id(), ShopClientData.revision()));
+                    ShopClientData.setStatus(Component.translatable(KEY + "status.deleting"));
+                }).openGui();
     }
 
     /** 搜索框内容变化：更新过滤条件、回到顶部、重建网格。 */
@@ -199,6 +344,12 @@ public class ShopScreen extends BaseScreen {
     @Override
     public void onClosed() {
         super.onClosed();
+        // 切到编辑器时保留快照（编辑器保存需要当前目录版本）；真正关闭界面才丢弃。
+        boolean switchingToEditor = openingEditor;
+        openingEditor = false;
+        if (switchingToEditor) {
+            return;
+        }
         // 关闭界面即丢弃快照：1 万条商品不常驻客户端内存，下次打开重新向服务端请求。
         ShopClientData.clear();
     }
@@ -248,15 +399,28 @@ public class ShopScreen extends BaseScreen {
     private class SidePanel extends Panel {
         private static final int BTN_H = 40;
         private static final int BTN_GAP = 4;
+        private final SimpleTextButton editModeButton;
 
         SidePanel(Panel parent) {
             super(parent);
+            this.editModeButton = SimpleTextButton.create(this,
+                    Component.translatable(KEY + "edit.button"), Icons.SETTINGS,
+                    button -> toggleEditMode(),
+                    Component.translatable(KEY + "edit.tip"));
+        }
+
+        void updateEditLabel() {
+            editModeButton.setTitle(Component.translatable(KEY
+                    + (ShopClientData.editMode() ? "edit.done" : "edit.button")));
         }
 
         @Override
         public void addWidgets() {
             add(new SideButton(this, ShopSide.BUY, Component.translatable(KEY + "side.buy"), Icons.MONEY));
             add(new SideButton(this, ShopSide.SELL, Component.translatable(KEY + "side.sell"), Icons.BIN));
+            if (ShopClientData.canEdit()) {
+                add(editModeButton);
+            }
         }
 
         @Override
@@ -268,6 +432,8 @@ public class ShopScreen extends BaseScreen {
                     y += BTN_H + BTN_GAP;
                 }
             }
+            editModeButton.setPosAndSize(4, Math.max(y, height - 22), Math.max(1, width - 8), 18);
+            updateEditLabel();
         }
 
         @Override
@@ -337,6 +503,7 @@ public class ShopScreen extends BaseScreen {
     private class TabsPanel extends Panel {
         private static final int TAB_H = 20;
         private static final int TAB_GAP = 3;
+        private static final int ROW_GAP = 2;
 
         TabsPanel(Panel parent) {
             super(parent);
@@ -360,14 +527,41 @@ public class ShopScreen extends BaseScreen {
 
         @Override
         public void alignWidgets() {
+            int avail = Math.max(1, width);
             int x = 0;
+            int y = 0;
             for (Widget widget : getWidgets()) {
-                if (widget instanceof TabButton tab) {
-                    int tabWidth = tab.preferredWidth();
-                    tab.setPosAndSize(x, 1, tabWidth, TAB_H);
-                    x += tabWidth + TAB_GAP;
+                if (!(widget instanceof TabButton tab)) {
+                    continue;
                 }
+                int tabWidth = Math.min(tab.preferredWidth(), avail);
+                if (x > 0 && x + tabWidth > avail) {
+                    x = 0;
+                    y += TAB_H + ROW_GAP;
+                }
+                tab.setPosAndSize(x, 1 + y, tabWidth, TAB_H);
+                x += tabWidth + TAB_GAP;
             }
+        }
+
+        /** 页签按可用宽度换行后需要的高度（单行时就是 {@code TAB_H}）。 */
+        int requiredHeight(int availableWidth) {
+            int avail = Math.max(1, availableWidth);
+            int x = 0;
+            int rows = 1;
+            for (Widget widget : getWidgets()) {
+                if (!(widget instanceof TabButton tab)) {
+                    continue;
+                }
+                int tabWidth = Math.min(tab.preferredWidth(), avail);
+                if (x > 0 && x + tabWidth > avail) {
+                    rows++;
+                    x = 0;
+                }
+                x += tabWidth + TAB_GAP;
+            }
+            // 上下各留 1px：第一行从 y+1 开始画，最后一行要能画完 TAB_H 高度。
+            return rows * TAB_H + (rows - 1) * ROW_GAP + 2;
         }
 
         @Override
@@ -385,9 +579,15 @@ public class ShopScreen extends BaseScreen {
             setSize(preferredWidth(), 20);
         }
 
+        /** 文字左边界相对按钮的左偏移：有图标时先让出 16px 图标 + 间距。 */
+        private int textOffset() {
+            return this.icon.isEmpty() ? 6 : 24;
+        }
+
         int preferredWidth() {
             int textWidth = getGui().getTheme().getStringWidth(getTitle().getString());
-            return this.icon.isEmpty() ? textWidth + 12 : textWidth + 24;
+            // 左内边距 + 图标 + 图标与文字的间距 + 文字宽度 + 右内边距：保证整串文字都能画下。
+            return this.icon.isEmpty() ? textWidth + 14 : textWidth + 32;
         }
 
         private boolean isActive() {
@@ -396,6 +596,14 @@ public class ShopScreen extends BaseScreen {
 
         @Override
         public void onClicked(MouseButton button) {
+            // 编辑模式下的右键：打开分类编辑器（改名 / 换图标）。
+            if (button.isRight()) {
+                if (!categoryId.isEmpty()) {
+                    playClickSound();
+                    openCategoryEditorFor(categoryId);
+                }
+                return;
+            }
             playClickSound();
             ShopClientData.setCategoryId(categoryId);
             // 立刻重建：页签高亮与商品网格同时刷新。
@@ -413,12 +621,11 @@ public class ShopScreen extends BaseScreen {
                 ShopRender.roundedRect(graphics, x, y, w, h, 4, ShopRender.SLOT_HOVER);
             }
             ShopRender.roundedRect(graphics, x, y + h - 2, w, 2, 1, active ? ShopRender.ACCENT : 0x00000000);
-            int textX = x + 6;
+            int textX = x + textOffset();
             if (!this.icon.isEmpty()) {
                 this.icon.draw(graphics, x + 4, y + 2, 16, 16);
-                textX = x + 22;
             }
-            theme.drawString(graphics, theme.trimStringToWidth(getTitle().getString(), w - (textX - x) - 4),
+            theme.drawString(graphics, theme.trimStringToWidth(getTitle().getString(), w - textOffset() - 3),
                     textX, y + 6, active ? Color4I.rgb(0xFFFFFF) : Color4I.rgb(0xC0C8D8), Theme.SHADOW);
         }
 
@@ -488,11 +695,22 @@ public class ShopScreen extends BaseScreen {
         @Override
         public void addWidgets() {
             List<ShopDataPayload.EntryData> visible = ShopClientData.filtered();
-            grid = VirtualGrid.of(width, height, visible.size(), TILE_W, TILE_H, TILE_GAP, TILE_GAP);
+            boolean showCreate = showCreateTile();
+            grid = VirtualGrid.of(width, height, visible.size() + (showCreate ? 1 : 0),
+                    TILE_W, TILE_H, TILE_GAP, TILE_GAP);
             windowFrom = grid.firstVisibleIndex(getScrollY());
             windowTo = grid.lastVisibleIndex(getScrollY());
-            for (int i = windowFrom; i < windowTo && i < visible.size(); i++) {
-                ItemButton button = new ItemButton(this, visible.get(i));
+            for (int i = windowFrom; i < windowTo; i++) {
+                Button button;
+                if (showCreate && i == 0) {
+                    button = new CreateItemButton(this);
+                } else {
+                    int itemIndex = i - (showCreate ? 1 : 0);
+                    if (itemIndex < 0 || itemIndex >= visible.size()) {
+                        continue;
+                    }
+                    button = new ItemButton(this, visible.get(itemIndex));
+                }
                 button.setPosAndSize(grid.x(i), grid.y(i), TILE_W, TILE_H);
                 add(button);
             }
@@ -506,7 +724,7 @@ public class ShopScreen extends BaseScreen {
             }
             int index = windowFrom;
             for (Widget widget : getWidgets()) {
-                if (widget instanceof ItemButton) {
+                if (widget instanceof ItemButton || widget instanceof CreateItemButton) {
                     widget.setPosAndSize(current.x(index), current.y(index), TILE_W, TILE_H);
                     index++;
                 }
@@ -541,6 +759,11 @@ public class ShopScreen extends BaseScreen {
         @Override
         public void onClicked(MouseButton button) {
             playClickSound();
+            // 编辑模式下左键 = 删除这条商品（先弹确认框）。
+            if (ShopClientData.editMode()) {
+                confirmDelete(entry);
+                return;
+            }
             ShopClientData.select(entry.id());
             ShopClientData.setStatus(Component.translatable(KEY + "status.selected", plainNameOf(entry)));
         }
@@ -598,6 +821,49 @@ public class ShopScreen extends BaseScreen {
                 // 附魔确实随包同步过来了，这里提示玩家。
                 list.add(Component.translatable(KEY + "tip.has_components"));
             }
+        }
+
+        @Override
+        public WidgetType getWidgetType() {
+            return WidgetType.NORMAL;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // 编辑模式下的「新建商品」格子（固定排第一）
+    // ------------------------------------------------------------------
+
+    private class CreateItemButton extends Button {
+        CreateItemButton(Panel parent) {
+            super(parent, Component.translatable(KEY + "editor.open_item"), Icons.ADD);
+            setSize(TILE_W, TILE_H);
+        }
+
+        @Override
+        public void onClicked(MouseButton button) {
+            playClickSound();
+            openEditor();
+        }
+
+        @Override
+        public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+            GuiHelper.setupDrawing();
+            ShopRender.roundedRect(graphics, x, y, w, h, 4, ShopRender.SLOT_BG);
+            if (isMouseOver()) {
+                ShopRender.roundedRect(graphics, x, y, w, h, 4, ShopRender.SLOT_HOVER);
+            }
+            ShopRender.border(graphics, x, y, w, h, 1, ShopRender.ACCENT);
+            this.icon.draw(graphics, x + 4, y + 4, 16, 16);
+            theme.drawString(graphics, theme.trimStringToWidth(getTitle().getString(), w - 28),
+                    x + 24, y + 5, Color4I.rgb(0xFFFFFF), Theme.SHADOW);
+            theme.drawString(graphics, Component.translatable(KEY + "editor.open_item.hint").getString(),
+                    x + 24, y + 16, Color4I.rgb(0x8FD48F), Theme.SHADOW);
+        }
+
+        @Override
+        public void addMouseOverText(TooltipList list) {
+            list.add(getTitle());
+            list.add(Component.translatable(KEY + "editor.open_item.tip"));
         }
 
         @Override

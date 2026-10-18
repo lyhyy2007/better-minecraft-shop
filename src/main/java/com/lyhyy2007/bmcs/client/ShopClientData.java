@@ -37,6 +37,8 @@ public final class ShopClientData {
     private static int pendingReceived;
     private static long pendingBalance;
     private static boolean pendingOpen;
+    /** 当前玩家能否点「新建」：服务端按 OP 权限判定，只有第 0 片携带。 */
+    private static boolean pendingCanEdit;
     private static boolean accumulating;
 
     private static ShopDataPayload snapshot;
@@ -55,6 +57,10 @@ public final class ShopClientData {
     private static UUID selectedId;
     private static int quantity = 1;
     private static Component status = Component.empty();
+    /** 编辑模式开关（只影响客户端交互，改数据仍要服务端复核）。 */
+    private static boolean editMode;
+    /** 下一次装配完成后要自动选中的分类（新建 / 改名后由服务端指定）。 */
+    private static String pendingPreselect;
 
     private ShopClientData() {
     }
@@ -78,6 +84,7 @@ public final class ShopClientData {
             pendingTotal = payload.totalEntries();
             pendingBalance = payload.balance();
             pendingOpen = payload.openScreen();
+            pendingCanEdit = payload.canEdit();
             pendingReceived = 0;
             accumulating = true;
         } else if (!accumulating || payload.revision() != pendingRevision) {
@@ -101,7 +108,7 @@ public final class ShopClientData {
 
         // 装配完成的快照把分片字段归一（batchCount=1、batchIndex=0），
         // 界面层只看到「一份完整目录」，不需要知道分片细节。
-        install(new ShopDataPayload(pendingOpen, pendingRevision, pendingBalance, 0, 1, pendingTotal,
+        install(new ShopDataPayload(pendingOpen, pendingRevision, pendingBalance, pendingCanEdit, 0, 1, pendingTotal,
                 pendingCategories, List.copyOf(pendingEntries)));
         accumulating = false;
         return true;
@@ -110,6 +117,18 @@ public final class ShopClientData {
     private static void install(ShopDataPayload assembled) {
         snapshot = assembled;
         rebuildSearchIndex();
+
+        // 新建 / 改名后服务端会指定「自动选中哪个分类」。
+        if (pendingPreselect != null) {
+            String wanted = pendingPreselect;
+            pendingPreselect = null;
+            boolean exists = assembled.categories().stream()
+                    .anyMatch(category -> category.sellSide() == side.sells() && category.id().equals(wanted));
+            if (exists) {
+                categoryId = wanted;
+                filteredCache = null;
+            }
+        }
 
         // 选中的分类若已不存在（配置被改过），回到「全部」。
         if (!categoryId.isEmpty()
@@ -149,8 +168,8 @@ public final class ShopClientData {
             }
         }
         // 库存不参与过滤，因此过滤缓存无需失效；余额照常更新。
-        snapshot = new ShopDataPayload(current.openScreen(), current.revision(), patch.balance(), 0, 1,
-                current.totalEntries(), current.categories(), List.copyOf(updated));
+        snapshot = new ShopDataPayload(current.openScreen(), current.revision(), patch.balance(), current.canEdit(),
+                0, 1, current.totalEntries(), current.categories(), List.copyOf(updated));
         return found;
     }
 
@@ -170,15 +189,57 @@ public final class ShopClientData {
         pendingReceived = 0;
         pendingBalance = 0L;
         pendingOpen = false;
+        pendingCanEdit = false;
         accumulating = false;
         selectedId = null;
         search = "";
+        editMode = false;
         status = Component.empty();
     }
 
     /** 本次快照是否由「打开商店」请求触发。 */
     public static boolean openRequested() {
         return snapshot != null && snapshot.openScreen();
+    }
+
+    /** 当前玩家能否点「新建」（服务端按 OP 权限判定）。 */
+    public static boolean canEdit() {
+        return snapshot != null && snapshot.canEdit();
+    }
+
+    /** 编辑模式：开启后右键商品可删除、右键分类可改名 / 换图标。 */
+    public static boolean editMode() {
+        return editMode;
+    }
+
+    public static void setEditMode(boolean value) {
+        editMode = value;
+    }
+
+    /** 下一次装配完成后自动选中的分类（传空串 = 取消）。 */
+    public static void preselectCategory(String id) {
+        pendingPreselect = id == null || id.isBlank() ? null : id;
+    }
+
+    /** 当前选中的分类（「全部」页签返回空）。 */
+    public static Optional<ShopDataPayload.CategoryData> selectedCategory() {
+        if (categoryId.isEmpty()) {
+            return Optional.empty();
+        }
+        return categories().stream()
+                .filter(category -> category.sellSide() == side.sells() && category.id().equals(categoryId))
+                .findFirst();
+    }
+
+    /** 当前选中的分类是否可以在游戏内编辑（只有「新建分类」出来的分类可以）。 */
+    public static Optional<ShopDataPayload.CategoryData> editableSelectedCategory() {
+        return selectedCategory().filter(ShopDataPayload.CategoryData::editable);
+    }
+
+    /** 当前栏位下是否已经存在至少一个游戏内新建的分类。 */
+    public static boolean hasEditableCategory() {
+        boolean sellSide = side.sells();
+        return categories().stream().anyMatch(category -> category.sellSide() == sellSide && category.editable());
     }
 
     /** 是否正在等待后续分片（决定是否继续接收 openScreen=false 的后续片）。 */

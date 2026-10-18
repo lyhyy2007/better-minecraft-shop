@@ -4,11 +4,16 @@
 每条都在 components 里带一个唯一的附魔组合（components 只支持附魔；去重键 = 物品 id + 附魔签名，
 所以它们属于不同商品；纯物品条目才会按 item 合并）。
 
+1.0.5 起买入与卖出分目录：
+    in/*.json   只写 price（+ stock），代表「玩家向商店买入」
+    out/*.json  只写 sell_price，代表「玩家把物品卖给商店」
+
 用法：
-    python gen_stress_config.py <目标 shop_items 目录> [条目数] [--seed 42]
+    python gen_stress_config.py <目标 in 或 out 目录> [条目数] [--side=buy|sell] [--seed=42]
 
 示例（对着开发服的配置目录生成）：
-    python gen_stress_config.py ../run/config/better-minecraft-shop/shop_items 10000
+    python gen_stress_config.py ../run/config/better-minecraft-shop/in 10000 --side=buy
+    python gen_stress_config.py ../run/config/better-minecraft-shop/out 10000 --side=sell
 """
 import json
 import random
@@ -49,11 +54,16 @@ CATEGORIES = [
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     seed = 42
+    side = "buy"
     target = Path(args[0]) if args else Path(".")
     count = int(args[1]) if len(args) > 1 else 10000
     for extra in sys.argv[1:]:
         if extra.startswith("--seed="):
             seed = int(extra.split("=", 1)[1])
+        elif extra.startswith("--side="):
+            side = extra.split("=", 1)[1].lower()
+    if side not in ("buy", "sell"):
+        raise SystemExit("--side 只能是 buy 或 sell")
     random.seed(seed)
 
     target.mkdir(parents=True, exist_ok=True)
@@ -67,9 +77,6 @@ def main():
         # 用两级等级组合凑出 255×255 = 65025 个互不相同的商品。
         entry = {
             "item": item,
-            "price": price,
-            "sell_price": price // 3,
-            "stock": -1 if index % 4 else max(1, index % 500),
             "components": {
                 "minecraft:enchantments": {
                     "minecraft:sharpness": 1 + index % 255,
@@ -77,6 +84,12 @@ def main():
                 }
             },
         }
+        if side == "buy":
+            entry["price"] = price
+            entry["stock"] = -1 if index % 4 else max(1, index % 500)
+        else:
+            # 卖出只认 sell_price；给一个低于常见买入价的回收价。
+            entry["sell_price"] = max(1, price // 3)
         buckets[cid].append(entry)
 
     categories = []
@@ -86,11 +99,11 @@ def main():
             continue
         categories.append({"id": cid, "icon": icon, "items": items})
 
-    payload = {"version": 1, "categories": categories}
-    out = target / f"stress-{count}.json"
+    payload = {"version": 2, "categories": categories}
+    out = target / f"stress-{side}-{count}.json"
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     total = sum(len(c["items"]) for c in categories)
-    print(f"已写出 {out}")
+    print(f"已写出 {out}（side={side}）")
     print(f"  分类 {len(categories)} 个 / 商品 {total} 条 / 文件大小 {out.stat().st_size / 1024:.1f} KB")
 
 
