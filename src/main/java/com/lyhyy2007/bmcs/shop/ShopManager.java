@@ -3,6 +3,7 @@ package com.lyhyy2007.bmcs.shop;
 import com.lyhyy2007.bmcs.BetterMinecraftShop;
 import com.lyhyy2007.bmcs.config.ShopConfig;
 import com.lyhyy2007.bmcs.config.ShopItemEntry;
+import com.lyhyy2007.bmcs.config.ShopSide;
 import com.lyhyy2007.bmcs.currency.DeepCoinCurrency;
 import com.lyhyy2007.bmcs.network.ShopActionPayload;
 import com.lyhyy2007.bmcs.network.ShopDataPayload;
@@ -142,13 +143,13 @@ public final class ShopManager {
                 chunk.add(new ShopDataPayload.EntryData(
                         entry.id(),
                         entry.categoryId(),
-                        // 缓存里的模板副本：附魔 / 改名等组件原样过网，
+                        entry.side() == ShopSide.SELL,
+                        // 缓存里的模板副本：附魔等组件原样过网，
                         // 客户端展示的就是真正会拿到的东西。
                         ShopDataCache.get().template(entry, revision),
                         entry.price(),
                         entry.sellPrice(),
                         stockManager.remaining(entry),
-                        entry.tradeLimit(),
                         entry.customComponents()));
             }
             batches.add(new ShopDataPayload(
@@ -200,6 +201,15 @@ public final class ShopManager {
             return;
         }
         ShopItemEntry entry = found.get();
+
+        // 买入 / 卖出彻底分离：in/ 目录的条目只能买，out/ 目录的条目只能卖；方向不符直接拒绝。
+        boolean wantsBuy = payload.action() == ShopActionPayload.Action.BUY;
+        if (wantsBuy != (entry.side() == ShopSide.BUY)) {
+            player.sendSystemMessage(Component.translatable(
+                    "message." + BetterMinecraftShop.MOD_ID + ".wrong_direction"));
+            refresh(player);
+            return;
+        }
 
         ShopTransaction.Result result;
         try {

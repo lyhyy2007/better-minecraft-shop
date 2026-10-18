@@ -309,7 +309,8 @@ public final class BmcsCommands {
         return 1;
     }
 
-    /** {@code /bmcs debug config}：配置统计 / 路径 / 优先级表 / 热重载状态。 */    private static int debugConfig(CommandSourceStack source) {
+    /** {@code /bmcs debug config}：配置统计 / 路径 / 优先级表 / 热重载状态。 */
+    private static int debugConfig(CommandSourceStack source) {
         ShopConfig config = ShopConfig.get();
         source.sendSuccess(() -> Component.translatable(KEY + "debug.config.header", config.statistics()), false);
         source.sendSuccess(() -> Component.translatable(KEY + "debug.config.path",

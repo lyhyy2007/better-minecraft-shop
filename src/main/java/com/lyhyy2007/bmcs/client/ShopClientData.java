@@ -1,6 +1,7 @@
 package com.lyhyy2007.bmcs.client;
 
 import com.lyhyy2007.bmcs.BetterMinecraftShop;
+import com.lyhyy2007.bmcs.config.ShopSide;
 import com.lyhyy2007.bmcs.network.ShopDataPayload;
 import com.lyhyy2007.bmcs.network.ShopPatchPayload;
 import com.lyhyy2007.bmcs.util.ItemNameUtil;
@@ -43,6 +44,11 @@ public final class ShopClientData {
     private static List<ShopDataPayload.EntryData> filteredCache;
     private static String filteredCategory = "\u0000";
     private static String filteredSearch = "\u0000";
+    /** 过滤缓存的第三个维度：当前栏位（买入 / 卖出）。 */
+    private static ShopSide filteredSide;
+
+    /** 当前栏位：默认「买入」，与界面左侧栏位一致。 */
+    private static ShopSide side = ShopSide.BUY;
 
     private static String categoryId = "";
     private static String search = "";
@@ -107,11 +113,13 @@ public final class ShopClientData {
 
         // 选中的分类若已不存在（配置被改过），回到「全部」。
         if (!categoryId.isEmpty()
-                && assembled.categories().stream().noneMatch(category -> category.id().equals(categoryId))) {
+                && assembled.categories().stream().noneMatch(
+                        category -> category.sellSide() == side.sells() && category.id().equals(categoryId))) {
             categoryId = "";
         }
-        // 选中的商品若已下架，清除选择。
-        if (selectedId != null && assembled.entries().stream().noneMatch(entry -> entry.id().equals(selectedId))) {
+        // 选中的商品若已下架（或已不在当前栏位），清除选择。
+        if (selectedId != null && assembled.entries().stream().noneMatch(
+                entry -> entry.sellSide() == side.sells() && entry.id().equals(selectedId))) {
             selectedId = null;
         }
     }
@@ -133,8 +141,8 @@ public final class ShopClientData {
         for (int i = 0; i < updated.size(); i++) {
             ShopDataPayload.EntryData entry = updated.get(i);
             if (entry.id().equals(patch.entryId())) {
-                updated.set(i, new ShopDataPayload.EntryData(entry.id(), entry.categoryId(), entry.template(),
-                        entry.price(), entry.sellPrice(), patch.remaining(), entry.maxTrade(),
+                updated.set(i, new ShopDataPayload.EntryData(entry.id(), entry.categoryId(), entry.sellSide(),
+                        entry.template(), entry.price(), entry.sellPrice(), patch.remaining(),
                         entry.customComponents()));
                 found = true;
                 break;
@@ -153,6 +161,7 @@ public final class ShopClientData {
         filteredCache = null;
         filteredCategory = "\u0000";
         filteredSearch = "\u0000";
+        filteredSide = null;
         pendingEntries.clear();
         pendingCategories = List.of();
         pendingRevision = -1;
@@ -223,14 +232,20 @@ public final class ShopClientData {
         if (current == null) {
             return List.of();
         }
-        if (filteredCache != null && filteredCategory.equals(categoryId) && filteredSearch.equals(search)) {
+        if (filteredCache != null && filteredSide == side && filteredCategory.equals(categoryId)
+                && filteredSearch.equals(search)) {
             return filteredCache;
         }
         List<ShopDataPayload.EntryData> all = current.entries();
         String[] keys = searchKeys;
         List<ShopDataPayload.EntryData> result = new ArrayList<>(all.size());
+        boolean sellSide = side.sells();
         for (int i = 0; i < all.size(); i++) {
             ShopDataPayload.EntryData entry = all.get(i);
+            // 买入 / 卖出彻底分离：只显示当前栏位对应目录里的条目。
+            if (entry.sellSide() != sellSide) {
+                continue;
+            }
             if (!categoryId.isEmpty() && !entry.categoryId().equals(categoryId)) {
                 continue;
             }
@@ -244,7 +259,36 @@ public final class ShopClientData {
         filteredCache = List.copyOf(result);
         filteredCategory = categoryId;
         filteredSearch = search;
+        filteredSide = side;
         return filteredCache;
+    }
+
+    /** 当前栏位。 */
+    public static ShopSide side() {
+        return side;
+    }
+
+    /** 切换栏位：分类、选中项、过滤缓存都只对原栏位有意义，一并重置。 */
+    public static void setSide(ShopSide value) {
+        ShopSide next = value == null ? ShopSide.BUY : value;
+        if (next != side) {
+            side = next;
+            categoryId = "";
+            selectedId = null;
+            filteredCache = null;
+        }
+    }
+
+    /** 当前栏位下的商品总数（顶栏计数用）。 */
+    public static int sideEntryCount() {
+        boolean sellSide = side.sells();
+        int count = 0;
+        for (ShopDataPayload.EntryData entry : entries()) {
+            if (entry.sellSide() == sellSide) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public static String categoryId() {

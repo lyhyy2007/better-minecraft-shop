@@ -12,7 +12,7 @@ version="${mod_version}"
 displayName="${mod_name}"
 authors="${mod_authors}"
 description="${mod_description}"
-# jar 根目录下的图标（构建时从工作区的 icons.png 复制而来）
+# jar 根目录下的图标（构建时从工作区的 大肥鱼.png 复制而来）
 logoFile="shop_icon.png"
 
 [[dependencies.${mod_id}]]

@@ -3,6 +3,7 @@ package com.lyhyy2007.bmcs.shop;
 import com.lyhyy2007.bmcs.config.ShopCategory;
 import com.lyhyy2007.bmcs.config.ShopConfig;
 import com.lyhyy2007.bmcs.config.ShopItemEntry;
+import com.lyhyy2007.bmcs.config.ShopSide;
 import com.lyhyy2007.bmcs.network.ShopDataPayload;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -74,7 +75,8 @@ public final class ShopDataCache {
         List<ShopDataPayload.CategoryData> built = new ArrayList<>(source.size());
         Map<UUID, ItemStack> builtTemplates = new LinkedHashMap<>();
         for (ShopCategory category : source) {
-            built.add(new ShopDataPayload.CategoryData(category.id(), category.displayName(), category.icon().copy()));
+            built.add(new ShopDataPayload.CategoryData(category.id(), category.displayName(),
+                    category.side() == ShopSide.SELL, category.icon().copy()));
             for (ShopItemEntry entry : category.items()) {
                 // 网络包里每一项都必须是「1 件」的独立副本：模板本身不参与交易。
                 builtTemplates.put(entry.id(), entry.template().copyWithCount(1));

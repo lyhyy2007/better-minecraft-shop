@@ -3,6 +3,7 @@ package com.lyhyy2007.bmcs.client;
 import com.lyhyy2007.bmcs.BetterMinecraftShop;
 import com.lyhyy2007.bmcs.client.ui.ShopRender;
 import com.lyhyy2007.bmcs.client.ui.VirtualGrid;
+import com.lyhyy2007.bmcs.config.ShopSide;
 import com.lyhyy2007.bmcs.currency.DeepCoinCurrency;
 import com.lyhyy2007.bmcs.network.ShopActionPayload;
 import com.lyhyy2007.bmcs.network.ShopDataPayload;
@@ -54,12 +55,15 @@ public class ShopScreen extends BaseScreen {
     private static final int TABS_H = 22;
     private static final int FOOTER_H = 30;
     private static final int SCROLL_W = 10;
+    /** 左侧「买入 / 卖出」栏位宽度。 */
+    private static final int SIDE_W = 56;
     private static final int TILE_W = 104;
     private static final int TILE_H = 44;
     private static final int TILE_GAP = 4;
 
     private static final String KEY = "gui." + BetterMinecraftShop.MOD_ID + ".";
 
+    private final SidePanel sidePanel;
     private final TabsPanel tabsPanel;
     private final GridPanel gridPanel;
     private final PanelScrollBar scrollBar;
@@ -71,6 +75,7 @@ public class ShopScreen extends BaseScreen {
 
     public ShopScreen() {
         super();
+        this.sidePanel = new SidePanel(this);
         this.tabsPanel = new TabsPanel(this);
         this.gridPanel = new GridPanel(this);
         this.scrollBar = new PanelScrollBar(this, ScrollBar.Plane.VERTICAL, this.gridPanel);
@@ -113,6 +118,7 @@ public class ShopScreen extends BaseScreen {
 
     @Override
     public void addWidgets() {
+        add(sidePanel);
         add(tabsPanel);
         add(gridPanel);
         add(scrollBar);
@@ -124,17 +130,23 @@ public class ShopScreen extends BaseScreen {
     public void alignWidgets() {
         searchBox.setPosAndSize(width - 124, 10, 116, 16);
 
-        tabsPanel.setPosAndSize(PAD, HEADER_H, Math.max(1, width - PAD * 2), TABS_H);
+        int bodyX = PAD + SIDE_W + PAD;
+        int bodyW = Math.max(1, width - bodyX - PAD);
+        int bodyH = Math.max(24, height - HEADER_H - FOOTER_H - PAD * 2);
+        sidePanel.setPosAndSize(PAD, HEADER_H, SIDE_W, bodyH);
+
+        tabsPanel.setPosAndSize(bodyX, HEADER_H, bodyW, TABS_H);
 
         int gridY = HEADER_H + TABS_H + PAD;
         int gridH = Math.max(1, height - gridY - FOOTER_H - PAD * 3);
-        int gridW = Math.max(1, width - PAD * 2 - SCROLL_W);
-        gridPanel.setPosAndSize(PAD, gridY, gridW, gridH);
+        int gridW = Math.max(1, bodyW - SCROLL_W);
+        gridPanel.setPosAndSize(bodyX, gridY, gridW, gridH);
         scrollBar.setPosAndSize(gridPanel.getPosX() + gridW, gridY, SCROLL_W, gridH);
 
         footerPanel.setPosAndSize(PAD, height - FOOTER_H - PAD, Math.max(1, width - PAD * 2), FOOTER_H);
 
         // 子面板的尺寸刚刚才确定，必须在这里再对齐一次（FTB 的 alignWidgets 是自上而下的）。
+        sidePanel.alignWidgets();
         tabsPanel.alignWidgets();
         gridPanel.alignWidgets();
         footerPanel.alignWidgets();
@@ -160,7 +172,7 @@ public class ShopScreen extends BaseScreen {
 
         if (ShopClientData.hasData()) {
             Component counter = Component.translatable(KEY + "counter",
-                    ShopClientData.entries().size(), ShopClientData.filtered().size());
+                    ShopClientData.sideEntryCount(), ShopClientData.filtered().size());
             theme.drawString(graphics, counter.getString(), x + 150, y + 18, Color4I.rgb(0x9AA6B8), Theme.SHADOW);
         }
     }
@@ -177,6 +189,7 @@ public class ShopScreen extends BaseScreen {
     /** 服务端刷新数据后调用：重建列表但保留滚动、搜索与选中状态。 */
     public void onDataUpdated() {
         gridPanel.refreshWidgets();
+        sidePanel.refreshWidgets();
         tabsPanel.refreshWidgets();
         footerPanel.refreshWidgets();
         // 目录变小（或过滤结果变少）时把滚动位置夹回合法范围，避免停在内容之外。
@@ -228,6 +241,96 @@ public class ShopScreen extends BaseScreen {
     }
 
     // ------------------------------------------------------------------
+    // 左侧「买入 / 卖出」栏位
+    // ------------------------------------------------------------------
+
+    /** 左侧竖排的两个栏位：买入、卖出。切换后下方的分类页签与商品网格都只显示对应方向的内容。 */
+    private class SidePanel extends Panel {
+        private static final int BTN_H = 40;
+        private static final int BTN_GAP = 4;
+
+        SidePanel(Panel parent) {
+            super(parent);
+        }
+
+        @Override
+        public void addWidgets() {
+            add(new SideButton(this, ShopSide.BUY, Component.translatable(KEY + "side.buy"), Icons.MONEY));
+            add(new SideButton(this, ShopSide.SELL, Component.translatable(KEY + "side.sell"), Icons.BIN));
+        }
+
+        @Override
+        public void alignWidgets() {
+            int y = 4;
+            for (Widget widget : getWidgets()) {
+                if (widget instanceof SideButton button) {
+                    button.setPosAndSize(4, y, Math.max(1, width - 8), BTN_H);
+                    y += BTN_H + BTN_GAP;
+                }
+            }
+        }
+
+        @Override
+        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+            ShopRender.roundedRect(graphics, x, y, w, h, 6, ShopRender.PANEL_BG_ALT);
+            ShopRender.border(graphics, x, y, w, h, 1, ShopRender.PANEL_BORDER);
+        }
+    }
+
+    private class SideButton extends Button {
+        private final ShopSide side;
+
+        SideButton(Panel parent, ShopSide side, Component label, Icon icon) {
+            super(parent, label, icon);
+            this.side = side;
+        }
+
+        private boolean isActive() {
+            return ShopClientData.side() == side;
+        }
+
+        @Override
+        public void onClicked(MouseButton button) {
+            playClickSound();
+            if (isActive()) {
+                return;
+            }
+            // 两个方向的分类、商品、可选操作各不相同：切换栏位时一并清空分类与选中项。
+            ShopClientData.setSide(side);
+            ShopScreen.this.sidePanel.refreshWidgets();
+            ShopScreen.this.tabsPanel.refreshWidgets();
+            ShopScreen.this.gridPanel.refreshWidgets();
+            ShopScreen.this.footerPanel.refreshWidgets();
+            ShopScreen.this.scrollBar.setValue(0);
+            ShopClientData.setStatus(Component.translatable(
+                    side == ShopSide.BUY ? KEY + "status.side.buy" : KEY + "status.side.sell"));
+        }
+
+        @Override
+        public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+            boolean active = isActive();
+            ShopRender.roundedRect(graphics, x, y, w, h, 4, active ? ShopRender.TAB_ACTIVE : ShopRender.TAB_IDLE);
+            if (!active && isMouseOver()) {
+                ShopRender.roundedRect(graphics, x, y, w, h, 4, ShopRender.SLOT_HOVER);
+            }
+            ShopRender.roundedRect(graphics, x, y, 2, h, 1, active ? ShopRender.ACCENT : 0x00000000);
+
+            int iconY = y + 6;
+            this.icon.draw(graphics, x + (w - 16) / 2, iconY, 16, 16);
+            String label = theme.trimStringToWidth(getTitle().getString(), Math.max(1, w - 4));
+            theme.drawString(graphics, label, x + (w - theme.getStringWidth(label)) / 2, y + h - 15,
+                    active ? Color4I.rgb(0xFFFFFF) : Color4I.rgb(0xC0C8D8), Theme.SHADOW);
+        }
+
+        @Override
+        public void addMouseOverText(TooltipList list) {
+            list.add(getTitle());
+            list.add(Component.translatable(KEY
+                    + (side == ShopSide.BUY ? "side.buy.tip" : "side.sell.tip")));
+        }
+    }
+
+    // ------------------------------------------------------------------
     // 分类页签
     // ------------------------------------------------------------------
 
@@ -242,7 +345,12 @@ public class ShopScreen extends BaseScreen {
         @Override
         public void addWidgets() {
             add(new TabButton(this, "", Component.translatable(KEY + "tab.all"), null));
+            boolean sellSide = ShopClientData.side() == ShopSide.SELL;
             for (ShopDataPayload.CategoryData category : ShopClientData.categories()) {
+                // in/ 目录的分类只出现在「买入」栏位，out/ 目录的分类只出现在「卖出」栏位。
+                if (category.sellSide() != sellSide) {
+                    continue;
+                }
                 // 分类名：配置里写了 display_name 就用它（支持翻译键），否则用内置分类翻译键，
                 // 再否则退回分类 id —— 名字不再需要服主在 JSON 里维护。
                 Component label = ItemNameUtil.categoryName(category.displayName(), category.id());
@@ -448,7 +556,8 @@ public class ShopScreen extends BaseScreen {
                 ShopRender.roundedRect(graphics, x, y, w, h, 4, ShopRender.SLOT_HOVER);
             }
 
-            boolean soldOut = !entry.unlimited() && entry.remaining() <= 0;
+            boolean buySide = !entry.sellSide();
+            boolean soldOut = buySide && !entry.unlimited() && entry.remaining() <= 0;
             this.icon.draw(graphics, x + 4, y + 4, 16, 16);
 
             int textX = x + 24;
@@ -456,38 +565,37 @@ public class ShopScreen extends BaseScreen {
             theme.drawString(graphics, theme.trimStringToWidth(plainNameOf(entry), maxTextWidth),
                     textX, y + 5, soldOut ? Color4I.rgb(0x808A9A) : Color4I.rgb(0xFFFFFF), Theme.SHADOW);
 
-            theme.drawString(graphics,
-                    Component.translatable(KEY + "tile.buy", formatMoney(entry.price())).getString(),
-                    textX, y + 16, Color4I.rgb(0xFFC94A), Theme.SHADOW);
+            // 买入条目只显示买入价，卖出条目只显示卖出价：两边价格来自不同目录，互不影响。
+            Component priceLine = buySide
+                    ? Component.translatable(KEY + "tile.buy", formatMoney(entry.price()))
+                    : Component.translatable(KEY + "tile.sell", formatMoney(entry.sellPrice()));
+            theme.drawString(graphics, priceLine.getString(), textX, y + 16,
+                    buySide ? Color4I.rgb(0xFFC94A) : Color4I.rgb(0x8FD48F), Theme.SHADOW);
 
-            String stockText = entry.unlimited()
-                    ? Component.translatable(KEY + "stock.unlimited").getString()
-                    : Component.translatable(KEY + "stock.left", entry.remaining()).getString();
-            theme.drawString(graphics, stockText, textX, y + 26,
-                    soldOut ? Color4I.rgb(0xE05A5A) : Color4I.rgb(0x9AA6B8), Theme.SHADOW);
-
-            if (entry.sellable()) {
-                String sellText = Component.translatable(KEY + "tile.sell", formatMoney(entry.sellPrice())).getString();
-                theme.drawString(graphics, sellText, x + w - theme.getStringWidth(sellText) - 5, y + h - 11,
-                        Color4I.rgb(0x8FD48F), Theme.SHADOW);
+            if (buySide) {
+                String stockText = entry.unlimited()
+                        ? Component.translatable(KEY + "stock.unlimited").getString()
+                        : Component.translatable(KEY + "stock.left", entry.remaining()).getString();
+                theme.drawString(graphics, stockText, textX, y + 26,
+                        soldOut ? Color4I.rgb(0xE05A5A) : Color4I.rgb(0x9AA6B8), Theme.SHADOW);
             }
         }
 
         @Override
         public void addMouseOverText(TooltipList list) {
             list.add(displayNameOf(entry));
-            list.add(Component.translatable(KEY + "tip.price", formatMoney(entry.price())));
-            if (entry.sellable()) {
+            if (entry.sellSide()) {
                 list.add(Component.translatable(KEY + "tip.sell_price", formatMoney(entry.sellPrice())));
+            } else {
+                list.add(Component.translatable(KEY + "tip.price", formatMoney(entry.price())));
+                list.add(entry.unlimited()
+                        ? Component.translatable(KEY + "stock.unlimited")
+                        : Component.translatable(KEY + "stock.left", entry.remaining()));
             }
-            list.add(entry.unlimited()
-                    ? Component.translatable(KEY + "stock.unlimited")
-                    : Component.translatable(KEY + "stock.left", entry.remaining()));
-            list.add(Component.translatable(KEY + "tip.max_trade", entry.maxTrade()));
             list.add(Component.translatable(KEY + "tip.category", entry.categoryId()));
             list.add(Component.translatable(KEY + "tip.item_id", entry.template().getItem().getDescriptionId()));
             if (entry.customComponents()) {
-                // 附魔 / 改名等组件确实随包同步过来了，这里提示玩家。
+                // 附魔确实随包同步过来了，这里提示玩家。
                 list.add(Component.translatable(KEY + "tip.has_components"));
             }
         }
@@ -514,15 +622,15 @@ public class ShopScreen extends BaseScreen {
         @Override
         public void addWidgets() {
             add(quantityBox);
-            add(buyButton);
-            add(sellButton);
+            // 买卖分离后底部只显示当前方向对应的那一个操作按钮。
+            add(ShopClientData.side() == ShopSide.SELL ? sellButton : buyButton);
         }
 
         @Override
         public void alignWidgets() {
             quantityBox.setPosAndSize(46, 6, 44, 16);
             buyButton.setPos(98, 4);
-            sellButton.setPos(98 + buyButton.getWidth() + 6, 4);
+            sellButton.setPos(98, 4);
         }
 
         @Override

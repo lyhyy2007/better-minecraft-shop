@@ -1,7 +1,7 @@
 """生成大数据量压力测试配置（默认 10000 条商品）。
 
 因为原版物品注册表只有约 1300 个物品，要凑出 10000 条**互不重复**的商品条目，
-每条都在 components 里带一个唯一的 minecraft:custom_name（去重键 = 物品 id + 组件签名，
+每条都在 components 里带一个唯一的附魔组合（components 只支持附魔；去重键 = 物品 id + 附魔签名，
 所以它们属于不同商品；纯物品条目才会按 item 合并）。
 
 用法：
@@ -63,27 +63,20 @@ def main():
         cid = order[(index - 1) % len(order)]
         item = ITEMS[(index * 7) % len(ITEMS)]
         price = random.randint(1, 5000)
-        # 名字两种写法各占一半：奇数条用纯字符串（最自然的写法），偶数条用显式文本组件。
-        # 这样压力测试同时覆盖「字符串 → 文本组件」的兼容规范化路径。
-        name = f"压力测试 #{index}"
-        custom_name = name if index % 2 else {"text": name}
+        # 附魔是唯一可用的「商品身份」区分手段（components 只认附魔），
+        # 用两级等级组合凑出 255×255 = 65025 个互不相同的商品。
         entry = {
             "item": item,
             "price": price,
             "sell_price": price // 3,
             "stock": -1 if index % 4 else max(1, index % 500),
-            "max_stack": 1 if item.endswith(("sword", "pickaxe", "bow", "shield", "helmet",
-                                             "chestplate")) else 64,
             "components": {
-                "minecraft:custom_name": custom_name,
+                "minecraft:enchantments": {
+                    "minecraft:sharpness": 1 + index % 255,
+                    "minecraft:unbreaking": 1 + (index // 255) % 255,
+                }
             },
         }
-        # 每 10 条再加一行 lore（同样测一遍列表内的字符串规范化）。
-        if index % 10 == 0:
-            entry["components"]["minecraft:lore"] = [f"第 {index} 号压力测试商品", "带 # 的说明 #tag"]
-        # 每 10 条加一次附魔，确保带组件解析路径也被压到（附魔走注册表查询）。
-        if index % 10 == 0:
-            entry["components"]["minecraft:enchantments"] = {"minecraft:unbreaking": 1 + index % 3}
         buckets[cid].append(entry)
 
     categories = []

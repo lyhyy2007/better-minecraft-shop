@@ -16,7 +16,7 @@
 | 项目 / Item | 值 / Value |
 |---|---|
 | 模组 id / Mod id | `better_minecraft_shop` |
-| 版本 / Version | 1.0.0 |
+| 版本 / Version | 1.0.4 |
 | Minecraft | 1.21.1 |
 | NeoForge | 21.1.200+（构建用 21.1.233 / built against 21.1.233） |
 | 前置 / Requires | FTB Library `2101.1.x`、Architectury API `13.0.6+` |
@@ -58,7 +58,7 @@
 2. 把 **FTB Library**、**Architectury API**、**更好的 Minecraft 商店** 三个 jar 一起放进
    `mods/` 目录（客户端与服务端都要放）。
 3. 启动游戏 / 服务器。**首次启动**会自动在 `config/better-minecraft-shop/shop_items/`
-   生成 8 个默认配置文件（按分类拆分）。
+   生成 8 个默认配置文件（按分类拆分，每条商品同时带买入价与回收价）。
 4. 进游戏后：打开背包（`E`）→ 左上角出现「商店」按钮；或者直接按 `O` 键。
    管理员也可以用命令 `/bmcs shop`。
 
@@ -68,7 +68,8 @@
 2. Drop **FTB Library**, **Architectury API** and **Better Minecraft Shop** into `mods/`
    (on both client and server).
 3. Start the game/server. On the **first launch** the mod writes 8 default config files
-   into `config/better-minecraft-shop/shop_items/`.
+   into `config/better-minecraft-shop/shop_items/` (split by category; every entry carries
+   both a buy price and a sell price).
 4. In game: press `E` for the inventory → click the **Shop** button in the top-left
    sidebar, or simply press `O`. Admins can also use `/bmcs shop`.
 
@@ -84,16 +85,18 @@
 | 键位 / Keybind | 默认 `O`，可在「选项 → 控制 → 按键绑定 → 更好的 Minecraft 商店」里改 / default `O`, rebindable in vanilla Controls |
 | 命令 / Command | `/bmcs shop`（管理员可 `/bmcs shop <玩家>`） |
 
-打开后：顶部是**分类页签**（武器工具、五金、建材、石材、木材、原材料、食物、种子…），
-中间是**商品网格**（图标、本地化名称、买价、剩余库存、回收价），右上角是**搜索框**，
-底部是**数量输入 + 购买 / 出售**按钮与状态提示。
+打开后：左侧是**「买入」/「卖出」两个栏位**（同一份配置：买入按 `price`、卖出按 `sell_price`），
+右侧顶部是**分类页签**（武器工具、五金、建材、石材、木材、原材料、食物、种子…），
+中间是**商品网格**（图标、本地化名称、价格、剩余库存），右上角是**搜索框**，
+底部是**数量输入 + 购买 / 出售**按钮（按钮随栏位切换）与状态提示。
 
 购买会检查你的**深索币（DeepCoin）**余额、把物品放进背包，并扣减限量商品的库存；
 出售会从**主背包 + 副手**（不碰护甲槽）取走与商品完全一致的物品并支付回收价。
 
-**English** — the shop screen shows category tabs, an item grid (icon, localized name,
-buy price, remaining stock, sell price), a search box and a quantity box with
-**Buy / Sell** buttons. Buying checks your DeepCoin balance, inserts the items and
+**English** — the left column has **Buy / Sell** tabs over the same config (Buy settles at
+`price` and shows limited stock, Sell settles at `sell_price`); the rest of the screen has
+category tabs, an item grid (icon, localized name, price), a search box and a quantity box
+with **Buy / Sell** buttons. Buying checks your DeepCoin balance, inserts the items and
 decrements limited stock; selling removes matching items from your main inventory and
 offhand (never from armor slots) and pays the recycle price.
 
@@ -110,22 +113,31 @@ offhand (never from armor slots) and pays the recycle price.
 
 ## 4. 配置文件 / Configuration
 
-路径 / Path：`config/better-minecraft-shop/shop_items/**.json`（**目录**，任意数量、可含子目录；
+路径 / Path：`config/better-minecraft-shop/shop_items/**.json`（一个**目录**，任意数量、可含子目录；
 与 jar 内 `data/better_minecraft_shop/shop_items/` 的默认模板一一对应）。
+一份配置同时供两个栏位使用：买入读 `price`（并展示 `stock`），卖出读 `sell_price`。
 兼容旧版单文件 `config/better-minecraft-shop/shop_items.json`。
 
 **中文**
 
+* **一份配置、两个栏位**：界面左侧「买入」「卖出」都读同一个目录。买入栏位按 `price` 结算
+  并显示 `stock` 限量；卖出栏位按 `sell_price` 结算且不限量。`sell_price` 不写（或 0）时用
+  `price` 兜底；`sell_price` 高于 `price` 会被压回 `price`（防刷钱）。
 * 每个文件独立解析：**单个文件写坏只丢这个文件**，不影响其它文件；单条商品写错只丢这一条。
 * 单文件 **10MB** 上限，超限拒绝加载；带 UTF-8 BOM 的文件会自动兼容。
 * 同一个物品在多处出现时按**分类优先级**去重（武器工具 > 五金 > 建材 > 石材 > 木材 > 原材料 > 食物 > 种子，
-  可用分类的 `priority: 0..100` 覆盖）；纯物品条目严格按 `item` 去重，带 `components` 的条目算不同商品。
+  可用分类的 `priority: 0..100` 覆盖）；纯物品条目严格按 `item` 去重，带附魔的条目算不同商品。
 * 改完文件**保存即生效**（监听目录自动热重载，约 1.5 秒），也可以 `/bmcs reload` 手动重载。
-* 物品**没有** `display_name` 字段：名字由游戏内置本地化提供，跟随客户端语言；
-  要改名请用 `components` 里的 `minecraft:custom_name`。
+* 物品**没有** `display_name` 字段：名字由游戏内置本地化提供，跟随客户端语言。
+* `components` **只支持附魔**（`minecraft:enchantments` / `minecraft:stored_enchantments`），
+  改名、lore 等其它组件已移除；单次交易上限固定取物品堆叠上限（≤64），不再有 `max_stack` 字段。
 
 **English**
 
+* **One config, two tabs**: the Buy and Sell tabs read the same folder. Buy settles at
+  `price` and shows `stock`; Sell settles at `sell_price` with no stock limit.
+  `sell_price` falls back to `price` when missing (or 0); a `sell_price` above `price`
+  is clamped to `price` (anti money-loop).
 * Each file is parsed independently: a broken file is skipped without affecting others,
   and a broken entry is skipped without affecting the rest of its file.
 * 10 MB per-file limit (larger files are refused); UTF-8 BOM is tolerated.
@@ -134,9 +146,13 @@ offhand (never from armor slots) and pays the recycle price.
   override per category with `priority: 0..100`).
 * Saving a file applies immediately (directory watcher, ~1.5 s debounce) — or run `/bmcs reload`.
 * There is **no** `display_name` field: item names come from the game's own localization
-  and follow the client language. Use `minecraft:custom_name` to rename an item.
+  and follow the client language.
+* `components` supports **enchantments only** (`minecraft:enchantments` /
+  `minecraft:stored_enchantments`); renaming and lore are removed, and `max_stack` no longer exists —
+  the per-trade limit is the item's stack size (≤64).
 
 ```json
+// shop_items/weapons_tools.json —— 一条商品同时写买入价与回收价
 {
   "version": 1,
   "categories": [
@@ -145,13 +161,11 @@ offhand (never from armor slots) and pays the recycle price.
       "icon": "minecraft:diamond_sword",
       "items": [
         { "item": "minecraft:iron_pickaxe", "price": 300, "sell_price": 90, "stock": -1 },
-        { "item": "minecraft:diamond", "price": 1000, "sell_price": 350, "stock": 100, "max_stack": 64 },
+        { "item": "minecraft:diamond", "price": 1000, "sell_price": 350, "stock": 100 },
         {
           "item": "minecraft:netherite_chestplate",
-          "price": 24000, "sell_price": 6000, "stock": 2, "max_stack": 1,
+          "price": 24000, "sell_price": 8000, "stock": 2,
           "components": {
-            "minecraft:custom_name": "深索纪念胸甲",
-            "minecraft:lore": ["深索币官方发售 #001"],
             "minecraft:enchantments": { "minecraft:protection": 4, "minecraft:mending": 1 }
           }
         }
@@ -172,21 +186,20 @@ offhand (never from armor slots) and pays the recycle price.
 | 商品字段 / Item | 必填 / Required | 默认 / Default | 说明 / Description |
 |---|---|---|---|
 | `item` | ✔ | — | 物品注册名 `命名空间:路径` / registry name |
-| `price` | ✔ | — | 买入单价，**必须 ≥ 1** / buy price, must be ≥ 1 |
-| `sell_price` | ✘ | `0` | 回收单价，`0` = 不可回收；高于 `price` 会被压回（防刷钱）/ sell price, `0` = not sellable, clamped to `price` |
-| `stock` | ✘ | `-1` | `-1` 不限量；正数为限量初始值 / `-1` = unlimited |
-| `max_stack` | ✘ | `64` | 单次交易数量上限（≤64）/ max amount per trade |
-| `components` | ✘ | 空 | `DataComponentPatch`：附魔、改名、lore、属性… / data components |
-| `variant` | ✘ | 空 | 显式区分同一物品的多种卖法 / explicit variant id for dedup |
+| `price` | ✔ | — | 买入单价，**必须 ≥ 1**；缺了这件物品就不出现在买入栏位 / buy price, must be ≥ 1 |
+| `sell_price` | ✘ | `price` | 回收单价；不写（或 0）用 `price` 兜底，高于 `price` 时压回 / sell price, falls back to `price` |
+| `stock` | ✘ | `-1` | 买入限量的初始库存：`-1` 不限量；只影响买入栏位 / `-1` = unlimited (buy tab only) |
+| `components` | ✘ | 空 | **只支持附魔**：`minecraft:enchantments`（附魔书用 `minecraft:stored_enchantments`）/ enchantments only |
 
-**名字类组件的三种写法都能用 / three accepted forms for name components**
-（原版 `custom_name` 走字符串化的 `FLAT_CODEC`，含 `#` 会解析失败；本模组已做规范化）:
+**只支持附魔 / enchantments only**
 
 ```json
-"minecraft:custom_name": "深索纪念胸甲"
-"minecraft:custom_name": "限量发售 #001"
-"minecraft:custom_name": { "text": "限量发售 #001", "color": "gold" }
+"components": {
+  "minecraft:enchantments": { "minecraft:sharpness": 5, "minecraft:unbreaking": 3 }
+}
 ```
+
+单次交易上限固定取物品堆叠上限（≤64），没有 `max_stack` 字段；改名、lore 等其它组件已移除。
 
 **限量库存语义 / limited stock semantics**
 
@@ -215,7 +228,7 @@ offhand (never from armor slots) and pays the recycle price.
 需要 **JDK 21**（Gradle 由 wrapper 自动下载）。两种依赖方式任选其一：
 
 ```bash
-git clone <本仓库地址> && cd better-minecraft-shop-1.0.0
+git clone <本仓库地址> && cd better-minecraft-shop-1.0.4
 
 # 方式 A：把前置 jar 放进 libs/（离线可用，确切文件名见 libs/README.md）
 ./gradlew build            # Windows: gradlew.bat build
@@ -224,7 +237,7 @@ git clone <本仓库地址> && cd better-minecraft-shop-1.0.0
 ./gradlew build
 ```
 
-产物：`build/libs/better-minecraft-shop-1.0.0.jar`（约 146 KB，**不含**前置模组）。
+产物：`build/libs/better-minecraft-shop-1.0.4.jar`（约 419 KB，其中模组图标约 273 KB；**不含**前置模组）。
 
 开发运行 / 离线自检：
 
@@ -234,7 +247,7 @@ git clone <本仓库地址> && cd better-minecraft-shop-1.0.0
 
 python tools/verify_assets.py .                                        # 配置/语言/侧边栏/架构不变量
 java --class-path build/classes/java/main tools/VirtualGridCheck.java   # 虚拟滚动几何断言
-python tools/check_jar.py build/libs/better-minecraft-shop-1.0.0.jar    # 产物内容检查
+python tools/check_jar.py build/libs/better-minecraft-shop-1.0.4.jar    # 产物内容检查
 python tools/gen_stress_config.py run/config/better-minecraft-shop/shop_items 10000   # 10000 条压力配置
 ```
 
@@ -242,7 +255,8 @@ python tools/gen_stress_config.py run/config/better-minecraft-shop/shop_items 10
 Either drop the two prerequisite jars into `libs/` (see `libs/README.md` for the exact
 file names; fully offline), or leave `libs/` empty and let Gradle fetch them from the
 official Maven repositories. The artifact lands in
-`build/libs/better-minecraft-shop-1.0.0.jar` (~146 KB, prerequisites are not bundled).
+`build/libs/better-minecraft-shop-1.0.4.jar` (~419 KB; the mod icon is ~273 KB of that,
+prerequisites are not bundled).
 `runServer` needs `run/eula.txt` with `eula=true`; `runClient` lets you press `O`.
 
 ---
@@ -250,7 +264,7 @@ official Maven repositories. The artifact lands in
 ## 6. 目录结构 / Project layout
 
 ```text
-better-minecraft-shop-1.0.0/
+better-minecraft-shop-1.0.4/
 ├── LICENSE / README.md / CHANGELOG.md / .gitignore / .gitattributes
 ├── build.gradle / settings.gradle / gradle.properties / gradlew(.bat) / gradle/wrapper/
 ├── libs/README.md                         前置 jar 放这里（jar 不入库）
@@ -324,10 +338,11 @@ no code was copied.
   rebindable `O` key, or `/bmcs shop`.
 * **One currency:** DeepCoin, stored as a NeoForge data attachment (survives death),
   managed with `/bmcs balance|pay|set|add`.
-* **Config:** `config/better-minecraft-shop/shop_items/**.json` — any number of files,
-  generated with 8 default templates on first launch. Per-file and per-entry error
-  isolation, 10 MB limit, UTF-8 BOM tolerant, cross-file duplicate resolution by category
-  priority, and hot reload while the server runs.
+* **Config:** `config/better-minecraft-shop/shop_items/**.json` — one folder with 8 default
+  templates generated on first launch; every entry carries both `price` (Buy tab) and
+  `sell_price` (Sell tab).
+  Per-file and per-entry error isolation, 10 MB limit, UTF-8 BOM tolerant, cross-file duplicate
+  resolution by category priority, and hot reload while the server runs.
 * **Scales to 10 000+ entries:** virtual scrolling on the client (only the visible
   window is built), batched syncing (≤ 500 entries per packet — 21 packets and a 36 KB
   largest packet for 10 044 entries) and per-trade incremental patches.

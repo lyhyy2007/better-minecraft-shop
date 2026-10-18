@@ -20,9 +20,12 @@ import net.neoforged.fml.loading.FMLPaths;
  *
  * <p>配置位置：
  * <ul>
- *   <li><b>推荐</b>：{@code config/better-minecraft-shop/shop_items/**.json}，任意数量、可递归子目录；</li>
+ *   <li><b>推荐</b>：{@code config/better-minecraft-shop/shop_items/**.json}，第一版的单层结构，
+ *       一条商品同时写 {@code price}（买入价）与 {@code sell_price}（回收价），任意数量、可递归子目录；</li>
  *   <li><b>兼容</b>：老版本的 {@code config/better-minecraft-shop/shop_items.json} 仍会被读取。</li>
  * </ul>
+ * 界面左侧的「买入」「卖出」两个栏位展示的是同一份配置：买入读 {@code price}（并受 {@code stock} 限量），
+ * 卖出读 {@code sell_price}。
  * 首次启动时，如果配置目录里一个 JSON 都没有，会把打包在 jar 里的默认配置
  * （{@code data/better_minecraft_shop/shop_items/*.json}）复制出去。
  *
@@ -141,9 +144,17 @@ public final class ShopConfig {
 
     /** 供命令输出使用的统计描述。 */
     public String statistics() {
+        long buyEntries = 0;
+        for (ShopItemEntry entry : entries) {
+            if (entry.side() == ShopSide.BUY) {
+                buyEntries++;
+            }
+        }
+        long sellEntries = entries.size() - buyEntries;
         return "目录版本 " + revision + "：" + categories.size() + " 个分类 / " + entries.size()
-                + " 件商品 / " + loadedFiles + " 个文件 / 去重 " + duplicates + " 条 / 跳过 "
-                + skippedEntries + " 条 / 耗时 " + lastLoadMillis + "ms";
+                + " 件商品（买入 " + buyEntries + " / 卖出 " + sellEntries + "）/ " + loadedFiles
+                + " 个文件 / 去重 " + duplicates + " 条 / 跳过 " + skippedEntries + " 条 / 耗时 "
+                + lastLoadMillis + "ms";
     }
 
     // ------------------------------------------------------------------
@@ -167,8 +178,9 @@ public final class ShopConfig {
         }
 
         Path legacy = legacyFile();
-        if (ShopConfigLoader.collectFiles(dir, legacy).isEmpty()) {
-            // 一个 JSON 都没有：把 jar 里的默认配置复制出来。
+        if (ShopConfigLoader.collectFiles(dir).isEmpty()) {
+            // 配置目录里一个 JSON 都没有：把 jar 里的默认配置复制出去。
+            // 默认配置里每条商品都同时带 price 与 sell_price，买入 / 卖出两个栏位都能直接用。
             ShopConfigLoader.writeDefaults(dir);
         }
 

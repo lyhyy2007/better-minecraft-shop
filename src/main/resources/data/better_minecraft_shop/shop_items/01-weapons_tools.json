@@ -10,7 +10,6 @@
           "price": 6000,
           "sell_price": 1500,
           "stock": 4,
-          "max_stack": 1,
           "components": {
             "minecraft:enchantments": {
               "minecraft:sharpness": 5,
@@ -23,10 +22,7 @@
           "price": 24000,
           "sell_price": 6000,
           "stock": 2,
-          "max_stack": 1,
           "components": {
-            "minecraft:custom_name": "深索纪念胸甲",
-            "minecraft:lore": ["深索币官方发售 #001", "名字里带 # 也能正常显示"],
             "minecraft:enchantments": {
               "minecraft:protection": 4,
               "minecraft:mending": 1

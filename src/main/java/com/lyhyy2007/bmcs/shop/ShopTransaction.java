@@ -2,6 +2,7 @@ package com.lyhyy2007.bmcs.shop;
 
 import com.lyhyy2007.bmcs.BetterMinecraftShop;
 import com.lyhyy2007.bmcs.config.ShopItemEntry;
+import com.lyhyy2007.bmcs.config.ShopSide;
 import com.lyhyy2007.bmcs.currency.DeepCoinCurrency;
 import com.lyhyy2007.bmcs.util.ItemStackUtil;
 import net.minecraft.network.chat.Component;
@@ -39,8 +40,11 @@ public final class ShopTransaction {
         return Component.translatable("message." + BetterMinecraftShop.MOD_ID + "." + key, args);
     }
 
-    /** 买入。 */
+    /** 买入（只接受 in/ 目录里的条目）。 */
     public static Result buy(ServerPlayer player, ShopItemEntry entry, int quantity, ShopStockManager stock) {
+        if (entry.side() != ShopSide.BUY) {
+            return Result.fail(msg("wrong_direction"));
+        }
         if (quantity <= 0) {
             return Result.fail(msg("invalid_amount"));
         }
@@ -92,8 +96,11 @@ public final class ShopTransaction {
         return Result.ok(msg("bought", entry.displayNameComponent(), quantity, DeepCoinCurrency.format(total)));
     }
 
-    /** 卖出（回收）。 */
+    /** 卖出（只接受 out/ 目录里的条目）。 */
     public static Result sell(ServerPlayer player, ShopItemEntry entry, int quantity, ShopStockManager stock) {
+        if (entry.side() != ShopSide.SELL) {
+            return Result.fail(msg("not_sellable", entry.displayNameComponent()));
+        }
         if (quantity <= 0) {
             return Result.fail(msg("invalid_amount"));
         }

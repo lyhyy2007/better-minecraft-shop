@@ -38,8 +38,15 @@ import net.minecraft.world.item.Items;
 /**
  * 多文件商店配置加载器。
  *
- * <p>目录：{@code config/better-minecraft-shop/shop_items/**.json}（递归，任意数量），
- * 外加对老版本单文件 {@code config/better-minecraft-shop/shop_items.json} 的兼容读取。
+ * <p>目录：{@code config/better-minecraft-shop/shop_items/**.json}（可递归子目录），用的是第一版的
+ * 单层结构：一条商品里同时写 {@code price} 与 {@code sell_price}。
+ * <ul>
+ *   <li>界面左侧「买入」栏位：用 {@code price} 结算，并展示 {@code stock}（限量）；</li>
+ *   <li>界面左侧「卖出」栏位：用 {@code sell_price} 结算，卖出不限量；</li>
+ *   <li>兼容：老版本单文件 {@code config/better-minecraft-shop/shop_items.json} 同样会被读取。</li>
+ * </ul>
+ * 同一份配置会为两个方向各解析一条商品（同一物品可以在买入 / 卖出栏位里各出现一次），
+ * 两个方向各自去重、各自定价，互不影响。
  *
  * <p>健壮性设计（这是相对 SDMShop 那套「一坨 NBT / 一次解析失败整份坏档」的核心改进）：
  * <ol>
@@ -55,9 +62,11 @@ import net.minecraft.world.item.Items;
  *
  * <p>去重：同一分类内（以及不同文件合并后）出现重复商品时，保留
  * {@link CategoryPriority 优先级}更高的一份，优先级相同则保留先出现的一份。
- * 判重键默认是「物品 id + 组件签名」——纯物品条目（没有 {@code components}）严格按 item 去重，
- * 而带附魔 / 改名的条目是**不同的商品**，不会被合并掉；配置里也可以写 {@code variant}
- * 显式区分同一物品的多种卖法。
+ * 判重键是「物品 id + 附魔签名」——没有附魔的条目严格按 item 去重，
+ * 带附魔的条目是**不同的商品**，不会被合并掉。
+ *
+ * <p>组件：{@code components} 目前**只支持附魔**（{@code minecraft:enchantments} /
+ * {@code minecraft:stored_enchantments}）；其它组件键会被忽略并打印提示，不再支持改名、lore 等。
  */
 public final class ShopConfigLoader {
     /** 配置格式版本。 */
@@ -73,18 +82,17 @@ public final class ShopConfigLoader {
             "01-weapons_tools.json", "02-hardware.json", "03-building.json", "04-stone.json",
             "05-wood.json", "06-material.json", "07-food.json", "08-seeds.json");
     public static final String BUNDLED_DIR = "shop_items";
+    /** 卖出商品在 {@code byKey} 里的键前缀，避免和买入的 {@code 分类.序号} 撞车。 */
+    private static final String SELL_KEY_PREFIX = "sell.";
     /** 内置资源全部读取失败时写出的最小配置文件。 */
     public static final String FALLBACK_FILE_NAME = "00-minimal.json";
 
     private static final int MAX_LOGGED_ERRORS = 40;
     private static final int MAX_LOGGED_DUPLICATES = 12;
-    /** 需要做「纯字符串 → 文本组件」规范化的组件名。 */
-    private static final List<String> NAME_COMPONENT_KEYS =
-            List.of("minecraft:custom_name", "minecraft:item_name");
-    private static final String LORE_COMPONENT_KEY = "minecraft:lore";
+    /** {@code components} 允许的组件键：只支持附魔（手持 / 附魔书）。 */
+    private static final List<String> ENCHANTMENT_COMPONENT_KEYS =
+            List.of("minecraft:enchantments", "minecraft:stored_enchantments");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    /** 紧凑 Gson：把组件对象序列化成单行 JSON 文档字符串时用（不带缩进，避免把换行塞进名字里）。 */
-    private static final Gson COMPACT_GSON = new GsonBuilder().disableHtmlEscaping().create();
     private static final String COMPONENT_KEY_SEPARATOR = "|";
 
     /** 逐条解析用的 Codec。物品数据全程走 DataComponent，不出现任何原始 NBT 操作。 */
@@ -92,11 +100,9 @@ public final class ShopConfigLoader {
             Codec.STRING.fieldOf("item").forGetter(RawItem::item),
             // 已废弃字段：仍然读出来，只为打印一条迁移提示，不再参与任何逻辑。
             Codec.STRING.optionalFieldOf("display_name", "").forGetter(RawItem::deprecatedDisplayName),
-            Codec.STRING.optionalFieldOf("variant", "").forGetter(RawItem::variant),
-            Codec.INT.fieldOf("price").forGetter(RawItem::price),
+            Codec.INT.optionalFieldOf("price", 0).forGetter(RawItem::price),
             Codec.INT.optionalFieldOf("sell_price", 0).forGetter(RawItem::sellPrice),
             Codec.INT.optionalFieldOf("stock", ShopItemEntry.UNLIMITED).forGetter(RawItem::stock),
-            Codec.INT.optionalFieldOf("max_stack", 64).forGetter(RawItem::maxStack),
             DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
                     .forGetter(RawItem::components)
     ).apply(instance, RawItem::new));
@@ -135,45 +141,23 @@ public final class ShopConfigLoader {
         long start = System.nanoTime();
         duplicatesLogged = 0;
         entryLogsWritten = 0;
-        List<Path> files = collectFiles(dir, legacyFile);
         RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registries);
 
         Map<String, PendingCategory> categories = new LinkedHashMap<>();
-        DedupRegistry dedup = new DedupRegistry();
+        // 去重按方向各管各的：同一条配置会在买入、卖出各生成一条商品，两者互不冲突。
+        DedupRegistry buyDedup = new DedupRegistry();
+        DedupRegistry sellDedup = new DedupRegistry();
         int skipped = 0;
+        int files = 0;
 
-        for (Path file : files) {
-            try {
-                long size = Files.size(file);
-                if (size <= 0L) {
-                    logEntry(false, "跳过空配置文件：{}", file);
-                    skipped++;
-                    continue;
-                }
-                if (size > MAX_FILE_BYTES) {
-                    logEntry(true, "配置文件过大（{} 字节 > 上限 {} 字节），已拒绝加载：{}",
-                            size, MAX_FILE_BYTES, file);
-                    skipped++;
-                    continue;
-                }
-                String text = Files.readString(file, StandardCharsets.UTF_8);
-                // Windows 编辑器（记事本 / PowerShell Set-Content）常写出 UTF-8 BOM：
-                // 先剔掉它，避免「文件明明是对的却整份解析失败」。
-                if (!text.isEmpty() && text.charAt(0) == '\uFEFF') {
-                    text = text.substring(1);
-                }
-                FileParse parsed = parseFile(file, text, ops);
-                skipped += parsed.skipped();
-                mergeInto(categories, parsed.categories(), dedup);
-            } catch (IOException e) {
-                // 读取失败（权限 / 文件被占用）：只丢这个文件。
-                logEntry(true, "读取配置文件失败，已跳过：{}｜{}", file, e.toString());
-                skipped++;
-            } catch (RuntimeException e) {
-                // 解析失败（JSON 语法 / 结构错误）：只丢这个文件，其余配置继续生效。
-                logEntry(true, "配置文件解析失败，已跳过该文件：{}｜{}", file, e.toString());
-                skipped++;
-            }
+        List<Path> paths = collectFiles(dir);
+        // 兼容老版本单文件：内容结构与目录里的配置一样，一条物品同时带买入价与回收价。
+        if (legacyFile != null && Files.isRegularFile(legacyFile) && !containsPath(paths, legacyFile)) {
+            paths.add(legacyFile);
+        }
+        for (Path file : paths) {
+            files++;
+            skipped += parseAndMerge(file, categories, buyDedup, sellDedup, ops);
         }
 
         List<ShopCategory> outCategories = new ArrayList<>(categories.size());
@@ -200,10 +184,13 @@ public final class ShopConfigLoader {
                 ordinal++;
                 // 稳定键：分类 id + 该分类内的最终序号。序号只取决于文件顺序与配置内容，
                 // 因此价格 / 库存调整不会改变它，存档里的库存也就不会错位。
-                String key = pending.id + "." + ordinal;
+                // 买入沿用原来的 {@code 分类.序号}，卖出加 sell. 前缀，两边键不冲突。
+                String key = pending.side == ShopSide.BUY
+                        ? pending.id + "." + ordinal
+                        : SELL_KEY_PREFIX + pending.id + "." + ordinal;
                 ShopItemEntry entry = new ShopItemEntry(stableId(key), key, pending.id, candidate.template(),
-                        candidate.price(), candidate.sellPrice(), candidate.stock(), candidate.maxTrade(),
-                        candidate.customComponents());
+                        candidate.price(), candidate.sellPrice(), candidate.stock(),
+                        candidate.customComponents(), pending.side);
                 items.add(entry);
                 outEntries.add(entry);
             }
@@ -213,7 +200,7 @@ public final class ShopConfigLoader {
                 emptyCategories.add(pending.id);
                 continue;
             }
-            outCategories.add(new ShopCategory(pending.id, pending.displayName, pending.icon, items));
+            outCategories.add(new ShopCategory(pending.side, pending.id, pending.displayName, pending.icon, items));
         }
         if (!emptyCategories.isEmpty()) {
             BetterMinecraftShop.LOGGER.info("[{}] 以下分类没有任何可用商品（条目非法或被更高优先级分类占用），已不显示：{}",
@@ -229,8 +216,76 @@ public final class ShopConfigLoader {
         }
 
         long millis = (System.nanoTime() - start) / 1_000_000L;
-        return new Result(List.copyOf(outCategories), List.copyOf(outEntries), files.size(),
-                skipped, dedup.duplicates(), finalComponentEntries, millis);
+        return new Result(List.copyOf(outCategories), List.copyOf(outEntries), files,
+                skipped, buyDedup.duplicates() + sellDedup.duplicates(), finalComponentEntries, millis);
+    }
+
+    /**
+     * 解析单个配置文件：只读一次、只解析一次 JSON，然后按买入 / 卖出各合并一遍。
+     *
+     * <p>一条配置会在两个方向各生成一条商品：买入条目取 {@code price} + {@code stock}，
+     * 卖出条目取 {@code sell_price}；两边各自去重，互不影响。
+     *
+     * @return 被跳过的文件 / 条目数
+     */
+    private static int parseAndMerge(Path file, Map<String, PendingCategory> categories,
+                                     DedupRegistry buyDedup, DedupRegistry sellDedup,
+                                     RegistryOps<JsonElement> ops) {
+        try {
+            long size = Files.size(file);
+            if (size <= 0L) {
+                logEntry(false, "跳过空配置文件：{}", file);
+                return 1;
+            }
+            if (size > MAX_FILE_BYTES) {
+                logEntry(true, "配置文件过大（{} 字节 > 上限 {} 字节），已拒绝加载：{}",
+                        size, MAX_FILE_BYTES, file);
+                return 1;
+            }
+            String text = Files.readString(file, StandardCharsets.UTF_8);
+            // Windows 编辑器（记事本 / PowerShell Set-Content）常写出 UTF-8 BOM：
+            // 先剔掉它，避免「文件明明是对的却整份解析失败」。
+            if (!text.isEmpty() && text.charAt(0) == '\uFEFF') {
+                text = text.substring(1);
+            }
+            JsonElement rootElement = JsonParser.parseString(text);
+            if (!rootElement.isJsonObject()) {
+                throw new IllegalArgumentException("顶层必须是 JSON 对象：" + file);
+            }
+            JsonObject root = rootElement.getAsJsonObject();
+            int version = root.has("version") ? root.get("version").getAsInt() : FORMAT_VERSION;
+            if (version != FORMAT_VERSION) {
+                BetterMinecraftShop.LOGGER.warn("[{}] {} 的 version={}，本模组当前支持 {}，将按 {} 解析",
+                        BetterMinecraftShop.MOD_NAME, file.getFileName(), version, FORMAT_VERSION, FORMAT_VERSION);
+            }
+            int skipped = 0;
+            FileParse buy = parseFile(file, root, ops, ShopSide.BUY);
+            mergeInto(categories, buy.categories(), buyDedup);
+            skipped += buy.skipped();
+            FileParse sell = parseFile(file, root, ops, ShopSide.SELL);
+            mergeInto(categories, sell.categories(), sellDedup);
+            skipped += sell.skipped();
+            return skipped;
+        } catch (IOException e) {
+            // 读取失败（权限 / 文件被占用）：只丢这个文件。
+            logEntry(true, "读取配置文件失败，已跳过：{}｜{}", file, e.toString());
+            return 1;
+        } catch (RuntimeException e) {
+            // 解析失败（JSON 语法 / 结构错误）：只丢这个文件，其余配置继续生效。
+            logEntry(true, "配置文件解析失败，已跳过该文件：{}｜{}", file, e.toString());
+            return 1;
+        }
+    }
+
+    /** 目录扫描结果里是否已经包含这个文件（用于避免老版本单文件被读两遍）。 */
+    private static boolean containsPath(List<Path> paths, Path target) {
+        Path normalized = target.toAbsolutePath().normalize();
+        for (Path path : paths) {
+            if (path.toAbsolutePath().normalize().equals(normalized)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -262,11 +317,10 @@ public final class ShopConfigLoader {
             }
         }
         if (!written.isEmpty()) {
-            BetterMinecraftShop.LOGGER.info("[{}] 已生成默认商店配置 {} 个文件：{}",
+            BetterMinecraftShop.LOGGER.info("[{}] 已生成默认配置 {} 个文件：{}",
                     BetterMinecraftShop.MOD_NAME, written.size(), dir.toAbsolutePath());
             return written;
         }
-
         // 兜底：连内置资源配置都读不到（jar 损坏 / 打包异常）时，也不要让新服主面对一个空商店。
         Path fallback = dir.resolve(FALLBACK_FILE_NAME);
         try {
@@ -284,12 +338,9 @@ public final class ShopConfigLoader {
     // 文件收集
     // ------------------------------------------------------------------
 
-    /** 递归收集目录下的 .json，外加兼容用的老单文件；结果按路径排序，保证多次加载顺序一致。 */
-    static List<Path> collectFiles(Path dir, Path legacyFile) {
+    /** 递归收集目录下的 .json；结果按路径排序，保证多次加载顺序一致。 */
+    static List<Path> collectFiles(Path dir) {
         List<Path> files = new ArrayList<>();
-        if (legacyFile != null && Files.isRegularFile(legacyFile)) {
-            files.add(legacyFile);
-        }
         if (dir != null && Files.isDirectory(dir)) {
             try (Stream<Path> stream = Files.walk(dir)) {
                 stream.filter(Files::isRegularFile)
@@ -319,18 +370,7 @@ public final class ShopConfigLoader {
     private record FileParse(List<PendingCategory> categories, int skipped) {
     }
 
-    private static FileParse parseFile(Path file, String text, RegistryOps<JsonElement> ops) {
-        JsonElement rootElement = JsonParser.parseString(text);
-        if (!rootElement.isJsonObject()) {
-            throw new IllegalArgumentException("顶层必须是 JSON 对象：" + file);
-        }
-        JsonObject root = rootElement.getAsJsonObject();
-        int version = root.has("version") ? root.get("version").getAsInt() : FORMAT_VERSION;
-        if (version != FORMAT_VERSION) {
-            BetterMinecraftShop.LOGGER.warn("[{}] {} 的 version={}，本模组当前支持 {}，将按 {} 解析",
-                    BetterMinecraftShop.MOD_NAME, file.getFileName(), version, FORMAT_VERSION, FORMAT_VERSION);
-        }
-
+    private static FileParse parseFile(Path file, JsonObject root, RegistryOps<JsonElement> ops, ShopSide side) {
         List<PendingCategory> categories = new ArrayList<>();
         int skipped = 0;
         int categoryIndex = 0;
@@ -371,8 +411,9 @@ public final class ShopConfigLoader {
             for (int i = 0; i < itemArray.size(); i++) {
                 JsonElement itemElement = itemArray.get(i);
                 int line = i + 1;
-                // 兼容处理：把「纯字符串写法的名字」先规范化成文本组件，再交给 codec（见方法注释）。
-                DataResult<RawItem> result = RAW_ITEM_CODEC.parse(ops, normalizeNameComponents(itemElement));
+                String where = file.getFileName() + " 分类 " + categoryId + " 第 " + line + " 条";
+                // components 只支持附魔：先剔掉其它组件键（并打印提示），再交给 codec。
+                DataResult<RawItem> result = RAW_ITEM_CODEC.parse(ops, sanitizeComponents(itemElement, where));
                 // 严格模式：resultOrPartial 会把「附魔解析失败」当成「字段缺失」，
                 // 交出一个没有附魔的物品 —— 正是要避免的静默丢数据。
                 Optional<RawItem> parsed = result.result();
@@ -383,7 +424,7 @@ public final class ShopConfigLoader {
                     skipped++;
                     continue;
                 }
-                Optional<Candidate> candidate = resolve(file, categoryId, line, parsed.get(), ops, priority);
+                Optional<Candidate> candidate = resolve(file, categoryId, line, parsed.get(), ops, priority, side);
                 if (candidate.isEmpty()) {
                     skipped++;
                     continue;
@@ -392,38 +433,20 @@ public final class ShopConfigLoader {
                 // 去重统一在全局注册表里做（跨文件、跨分类），见 DedupRegistry。
                 candidates.add(value);
             }
-            categories.add(new PendingCategory(categoryId, categoryName,
+            categories.add(new PendingCategory(side, categoryId, categoryName,
                     resolveIcon(readString(categoryObject, "icon")), priority, candidates));
         }
         return new FileParse(List.copyOf(categories), skipped);
     }
 
     /**
-     * 名字组件的兼容规范化。
+     * {@code components} 只保留附魔。
      *
-     * <p>原版把 {@code minecraft:custom_name} / {@code minecraft:item_name} / {@code minecraft:lore}
-     * 定义在 {@code ComponentSerialization.FLAT_CODEC} 上：它的值是<b>字符串</b>，
-     * 而且这个字符串会<b>再被当成一个 JSON 文档解析一次</b>
-     * （{@code JsonParser.parseString}，lenient 模式）。于是：
-     * <ul>
-     *   <li>{@code "custom_name": "深索纪念胸甲"} 能用 —— 裸文本在 lenient 模式下会被当作纯文本字面量；</li>
-     *   <li>{@code "custom_name": "压力测试 #1"} <b>会失败</b> —— {@code #}（以及 {@code = / ; { } [ ]} 等）
-     *       是 Gson 的非法字面量字符，直接抛 {@code MalformedJsonException}，
-     *       用户看到的现象是「名字里带个 # 整条商品被跳过」（本机实测复现）；</li>
-     *   <li>{@code "custom_name": {"text": "..."}} <b>也会失败</b> —— FLAT_CODEC 要求字符串，
-     *       对象会报 "Not a string"；对用户来说「最直观的写法反而不被接受」。</li>
-     * </ul>
-     *
-     * <p>这里在解析前统一处理成「一定能用」的形态：
-     * <ul>
-     *   <li>值是字符串且能被解析成 JSON 文档 → 原样保留；</li>
-     *   <li>值是字符串但不能被解析（含 {@code #} 等）→ 包装成 {@code {"text": "..."}} 的 JSON 文档字符串；</li>
-     *   <li>值直接是对象 / 数组 → 序列化成 JSON 文档字符串。</li>
-     * </ul>
-     * 结果是三种写法（裸文本 / JSON 文本组件字符串 / 组件对象）都能用，名字里出现任何字符都不会莫名失败；
-     * 只有数字、布尔这类根本不是组件的值才原样丢给 codec 去报错。
+     * <p>改名、lore 等其它组件已经取消：这里在解析前把 {@code components} 里除
+     * {@code minecraft:enchantments} / {@code minecraft:stored_enchantments} 之外的键剔掉，
+     * 并逐条打印提示，避免整条商品因为一个不支持的组件被静默丢弃。
      */
-    private static JsonElement normalizeNameComponents(JsonElement element) {
+    private static JsonElement sanitizeComponents(JsonElement element, String where) {
         if (!element.isJsonObject()) {
             return element;
         }
@@ -431,85 +454,33 @@ public final class ShopConfigLoader {
         if (!(item.get("components") instanceof JsonObject components)) {
             return element;
         }
-        JsonObject normalized = null;
-        for (String key : NAME_COMPONENT_KEYS) {
-            String document = toFlatComponentDocument(components.get(key));
-            if (document == null) {
-                continue;
-            }
-            if (normalized == null) {
-                normalized = components.deepCopy();
-            }
-            normalized.addProperty(key, document);
-        }
-        if (components.get(LORE_COMPONENT_KEY) instanceof JsonArray lines) {
-            JsonArray rewritten = new JsonArray(lines.size());
-            boolean changed = false;
-            for (JsonElement line : lines) {
-                String document = toFlatComponentDocument(line);
-                if (document == null) {
-                    rewritten.add(line);
-                } else {
-                    rewritten.add(document);
-                    changed = true;
-                }
-            }
-            if (changed) {
-                if (normalized == null) {
-                    normalized = components.deepCopy();
-                }
-                normalized.add(LORE_COMPONENT_KEY, rewritten);
+        List<String> dropped = new ArrayList<>();
+        for (String key : List.copyOf(components.keySet())) {
+            if (!ENCHANTMENT_COMPONENT_KEYS.contains(key)) {
+                dropped.add(key);
             }
         }
-        if (normalized == null) {
+        if (dropped.isEmpty()) {
             return element;
         }
-        JsonObject newItem = item.deepCopy();
-        newItem.add("components", normalized);
-        return newItem;
-    }
-
-    /** 返回需要替换成的 JSON 文档字符串；{@code null} 表示这个值已经能用、不需要改。 */
-    private static String toFlatComponentDocument(JsonElement value) {
-        if (value == null || value.isJsonNull()) {
-            return null;
+        JsonObject copy = item.deepCopy();
+        JsonObject sanitized = copy.getAsJsonObject("components");
+        for (String key : dropped) {
+            sanitized.remove(key);
         }
-        if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()) {
-            String raw = value.getAsString();
-            return isJsonDocument(raw) ? null : textComponentDocument(raw);
-        }
-        if (value.isJsonObject() || value.isJsonArray()) {
-            return COMPACT_GSON.toJson(value);
-        }
-        return null;
-    }
-
-    /** 这个字符串能否被 Gson（lenient，与原版 FLAT_CODEC 完全同样的调用）当成 JSON 文档解析。 */
-    private static boolean isJsonDocument(String raw) {
-        try {
-            JsonParser.parseString(raw);
-            return true;
-        } catch (RuntimeException e) {
-            return false;
-        }
-    }
-
-    /** 把任意文本包成文本组件 {@code {"text": "..."}} 的 JSON 文档字符串。 */
-    private static String textComponentDocument(String text) {
-        JsonObject component = new JsonObject();
-        component.addProperty("text", text);
-        return COMPACT_GSON.toJson(component);
+        logEntry(false, "{} 的 components 只支持附魔（{}），已忽略：{}",
+                where, String.join(" / ", ENCHANTMENT_COMPONENT_KEYS), String.join(", ", dropped));
+        return copy;
     }
 
     /** 把一条原始配置解析成候选商品；任何不合法之处都只跳过这一条并明确报错。 */
     private static Optional<Candidate> resolve(Path file, String categoryId, int line, RawItem raw,
-                                               RegistryOps<JsonElement> ops, int priority) {
+                                               RegistryOps<JsonElement> ops, int priority, ShopSide side) {
         String where = file.getFileName() + " 分类 " + categoryId + " 第 " + line + " 条";
 
         if (!raw.deprecatedDisplayName().isBlank()) {
             logEntry(false, "{} 使用了已移除的 display_name 字段（{}），该字段已被忽略："
-                            + "物品名现在由游戏内置本地化提供（跟随客户端语言），要自定义名字请用 "
-                            + "components 里的 minecraft:custom_name。",
+                            + "物品名现在由游戏内置本地化提供（跟随客户端语言）。",
                     where, raw.deprecatedDisplayName());
         }
 
@@ -523,42 +494,53 @@ public final class ShopConfigLoader {
             logEntry(true, "{} 的物品不存在或是空气：{}", where, itemId);
             return Optional.empty();
         }
-        if (raw.price() < 1) {
-            logEntry(true, "{} 的 price 必须 >= 1（当前 {}），已跳过", where, raw.price());
-            return Optional.empty();
-        }
-
-        int sellPrice = Math.max(0, raw.sellPrice());
-        if (sellPrice > raw.price()) {
-            // 卖价高于买价 = 无限刷钱漏洞，直接压回买价并警告，而不是默默放行。
-            logEntry(false, "{} 的 sell_price({}) 高于 price({})，会形成刷钱漏洞，已按 price 处理",
-                    where, sellPrice, raw.price());
-            sellPrice = raw.price();
-        }
-
-        int stock = raw.stock();
-        if (stock < ShopItemEntry.UNLIMITED) {
-            logEntry(false, "{} 的 stock({}) 非法，已按不限量处理", where, stock);
+        // 买入与卖出的价格各读各的列，互不影响：买入栏位只认 price，
+        // 卖出栏位只认 sell_price（没写时才退回 price）。同一条配置解析两次，各取所需。
+        int price;
+        int sellPrice;
+        int stock;
+        if (side == ShopSide.BUY) {
+            if (raw.price() < 1) {
+                logEntry(true, "{} 的 price 必须 >= 1（当前 {}），买入栏位已跳过该条", where, raw.price());
+                return Optional.empty();
+            }
+            price = raw.price();
+            sellPrice = 0;
+            stock = raw.stock();
+            if (stock < ShopItemEntry.UNLIMITED) {
+                logEntry(false, "{} 的 stock({}) 非法，已按不限量处理", where, stock);
+                stock = ShopItemEntry.UNLIMITED;
+            }
+        } else {
+            int payout = raw.sellPrice() > 0 ? raw.sellPrice() : raw.price();
+            if (payout < 1) {
+                logEntry(true, "{} 没有有效回收价（sell_price 或 price 至少要有一个 >= 1），卖出栏位已跳过该条",
+                        where);
+                return Optional.empty();
+            }
+            if (raw.price() >= 1 && payout > raw.price()) {
+                // 回收价高于买入价 = 无限刷钱：沿用第一版的规则压回买入价。
+                logEntry(false, "{} 的 sell_price({}) 高于 price({})，已压回 {}，避免刷钱",
+                        where, raw.sellPrice(), raw.price(), raw.price());
+                payout = raw.price();
+            }
+            price = 0;
+            sellPrice = payout;
+            // 卖出方向是「玩家把东西卖回商店」，不限制商店库存。
             stock = ShopItemEntry.UNLIMITED;
-        }
-
-        int maxTrade = Math.max(1, Math.min(64, raw.maxStack()));
-        if (raw.maxStack() != maxTrade) {
-            logEntry(false, "{} 的 max_stack({}) 超出 [1,64]，已按 {} 处理", where, raw.maxStack(), maxTrade);
         }
 
         try {
             ItemStack template = new ItemStack(item);
             if (!raw.components().isEmpty()) {
-                // applyComponents 只写入列出的组件，其余（含物品自带默认组件）保持原样。
+                // applyComponents 只写入列出的组件（此处只剩附魔），其余默认组件保持原样。
                 template.applyComponents(raw.components());
             }
-            String dedupKey = itemId + COMPONENT_KEY_SEPARATOR
-                    + (raw.variant().isBlank() ? canonicalComponents(raw.components(), ops) : raw.variant().trim());
-            return Optional.of(new Candidate(dedupKey, template, raw.price(), sellPrice, stock, maxTrade,
+            String dedupKey = itemId + COMPONENT_KEY_SEPARATOR + canonicalComponents(raw.components(), ops);
+            return Optional.of(new Candidate(dedupKey, template, price, sellPrice, stock,
                     !raw.components().isEmpty(), priority, where));
         } catch (RuntimeException e) {
-            logEntry(true, "{} 的 components 无法应用到 {}（附魔/属性可能不合法）｜{}", where, itemId, e.toString());
+            logEntry(true, "{} 的 components 无法应用到 {}（附魔不合法）｜{}", where, itemId, e.toString());
             return Optional.empty();
         }
     }
@@ -588,13 +570,14 @@ public final class ShopConfigLoader {
     private static void mergeInto(Map<String, PendingCategory> categories, List<PendingCategory> incoming,
                                   DedupRegistry dedup) {
         for (PendingCategory category : incoming) {
-            PendingCategory existing = categories.get(category.id);
+            String mapKey = category.mapKey();
+            PendingCategory existing = categories.get(mapKey);
             if (existing == null) {
                 // 新分类：先建一个空的归属容器挂进总表，再由注册表逐条决定去留
                 //（可能出现「这条已经被别的分类占用了」的情况）。
-                existing = new PendingCategory(category.id, category.displayName, category.icon,
+                existing = new PendingCategory(category.side, category.id, category.displayName, category.icon,
                         category.priority, List.of());
-                categories.put(category.id, existing);
+                categories.put(mapKey, existing);
             } else {
                 if (existing.displayName.isEmpty() && !category.displayName.isEmpty()) {
                     existing.displayName = category.displayName;
@@ -785,30 +768,38 @@ public final class ShopConfigLoader {
             }
             """;
 
-    private record RawItem(String item, String deprecatedDisplayName, String variant, int price, int sellPrice,
-                           int stock, int maxStack, DataComponentPatch components) {
+    private record RawItem(String item, String deprecatedDisplayName, int price, int sellPrice,
+                           int stock, DataComponentPatch components) {
     }
 
     /** 解析出来、但还没分配最终序号的商品。 */
     private record Candidate(String dedupKey, ItemStack template, int price, int sellPrice, int stock,
-                             int maxTrade, boolean customComponents, int priority, String source) {
+                             boolean customComponents, int priority, String source) {
     }
 
-    /** 合并中的分类（可变：需要在多文件之间累积条目）。 */
+    /** 合并中的分类（可变：需要在多文件之间累积条目）。买入与卖出的同名分类互不影响。 */
     private static final class PendingCategory {
+        private final ShopSide side;
         private final String id;
         private final int priority;
         private final List<Candidate> items;
         private String displayName;
         private ItemStack icon;
 
-        private PendingCategory(String id, String displayName, ItemStack icon, int priority, List<Candidate> items) {
+        private PendingCategory(ShopSide side, String id, String displayName, ItemStack icon, int priority,
+                                List<Candidate> items) {
+            this.side = side;
             this.id = id;
             this.displayName = displayName;
             this.icon = icon;
             this.priority = priority;
             // 解析阶段的条目先装在一个独立可变列表里，接受与否由 DedupRegistry 决定。
             this.items = new ArrayList<>(items);
+        }
+
+        /** 合并总表里的键：方向 + 分类 id，保证 in/ 与 out/ 里同名分类各占一项。 */
+        private String mapKey() {
+            return side.name() + "/" + id;
         }
     }
 }

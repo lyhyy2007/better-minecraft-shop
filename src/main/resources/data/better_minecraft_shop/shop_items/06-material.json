@@ -8,8 +8,8 @@
         { "item": "minecraft:coal", "price": 30, "sell_price": 10, "stock": -1 },
         { "item": "minecraft:redstone", "price": 20, "sell_price": 6, "stock": -1 },
         { "item": "minecraft:lapis_lazuli", "price": 45, "sell_price": 15, "stock": -1 },
-        { "item": "minecraft:diamond", "price": 1000, "sell_price": 350, "stock": 100, "max_stack": 64 },
-        { "item": "minecraft:emerald", "price": 900, "sell_price": 300, "stock": 64, "max_stack": 64 },
+        { "item": "minecraft:diamond", "price": 1000, "sell_price": 350, "stock": 100 },
+        { "item": "minecraft:emerald", "price": 900, "sell_price": 300, "stock": 64 },
         { "item": "minecraft:ender_pearl", "price": 150, "sell_price": 50, "stock": -1 },
         { "item": "minecraft:experience_bottle", "price": 200, "sell_price": 60, "stock": -1 }
       ]

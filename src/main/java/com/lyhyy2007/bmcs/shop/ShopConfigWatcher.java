@@ -8,6 +8,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.concurrent.TimeUnit;
@@ -114,9 +115,19 @@ public final class ShopConfigWatcher implements AutoCloseable {
             try {
                 WatchKey key = watchService.poll(POLL_MILLIS, TimeUnit.MILLISECONDS);
                 if (key != null) {
-                    boolean changed = !key.pollEvents().isEmpty();
+                    boolean changed = false;
+                    boolean created = false;
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                        changed = true;
+                        if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+                            created = true;
+                        }
+                    }
                     if (!key.reset()) {
                         // 目录被删除 / 不可访问：重新扫一遍配置目录，稍后若重新出现会再次注册。
+                        registerRecursively(ShopConfig.get().configDir());
+                    } else if (created) {
+                        // 新建了子目录（例如在 in/ 或 out/ 下再分子文件夹），也要纳入监听。
                         registerRecursively(ShopConfig.get().configDir());
                     }
                     if (changed) {

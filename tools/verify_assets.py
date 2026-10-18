@@ -65,9 +65,8 @@ component_items = 0
 
 def identity(item, entry):
     components = entry.get("components")
-    if entry.get("variant"):
-        suffix = entry["variant"].strip()
-    elif components:
+    if components:
+        # 只有附魔参与「商品身份」，其它组件会被模组忽略。
         suffix = json.dumps(components, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     else:
         suffix = ""

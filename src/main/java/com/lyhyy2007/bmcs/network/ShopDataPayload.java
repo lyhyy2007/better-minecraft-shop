@@ -125,45 +125,55 @@ public record ShopDataPayload(
         return batchIndex == batchCount - 1;
     }
 
-    /** 分类（页签）。{@code displayName} 可为空，空则由客户端的分类翻译键提供名字。 */
-    public record CategoryData(String id, String displayName, ItemStack icon) {
+    /**
+     * 分类（页签）。{@code displayName} 可为空，空则由客户端的分类翻译键提供名字。
+     *
+     * @param sellSide true 表示这是「卖出」栏位下的分类（来自 out/ 目录）
+     */
+    public record CategoryData(String id, String displayName, boolean sellSide, ItemStack icon) {
         public static final StreamCodec<RegistryFriendlyByteBuf, CategoryData> STREAM_CODEC = StreamCodec.of(
                 (buffer, value) -> {
                     buffer.writeUtf(value.id());
                     buffer.writeUtf(value.displayName());
+                    buffer.writeBoolean(value.sellSide());
                     ItemStack.STREAM_CODEC.encode(buffer, value.icon());
                 },
-                buffer -> new CategoryData(buffer.readUtf(), buffer.readUtf(),
+                buffer -> new CategoryData(buffer.readUtf(), buffer.readUtf(), buffer.readBoolean(),
                         ItemStack.STREAM_CODEC.decode(buffer)));
     }
 
-    /** 商品条目（不含展示名：由客户端本地化）。 */
+    /**
+     * 商品条目（不含展示名：由客户端本地化）。
+     *
+     * @param sellSide true 表示这是「卖出」栏位下的条目（来自 out/ 目录，价格在 sellPrice）；
+     *                 false 表示「买入」栏位下的条目（价格在 price）
+     */
     public record EntryData(
             UUID id,
             String categoryId,
+            boolean sellSide,
             ItemStack template,
             int price,
             int sellPrice,
             int remaining,
-            int maxTrade,
             boolean customComponents
     ) {
         public static final StreamCodec<RegistryFriendlyByteBuf, EntryData> STREAM_CODEC = StreamCodec.of(
                 (buffer, value) -> {
                     UUIDUtil.STREAM_CODEC.encode(buffer, value.id());
                     buffer.writeUtf(value.categoryId());
+                    buffer.writeBoolean(value.sellSide());
                     ItemStack.STREAM_CODEC.encode(buffer, value.template());
                     buffer.writeVarInt(value.price());
                     buffer.writeVarInt(value.sellPrice());
                     buffer.writeVarInt(value.remaining());
-                    buffer.writeVarInt(value.maxTrade());
                     buffer.writeBoolean(value.customComponents());
                 },
                 buffer -> new EntryData(
                         UUIDUtil.STREAM_CODEC.decode(buffer),
                         buffer.readUtf(),
+                        buffer.readBoolean(),
                         ItemStack.STREAM_CODEC.decode(buffer),
-                        buffer.readVarInt(),
                         buffer.readVarInt(),
                         buffer.readVarInt(),
                         buffer.readVarInt(),
@@ -173,8 +183,14 @@ public record ShopDataPayload(
             return remaining < 0;
         }
 
+        /** 是否属于买入栏位。 */
+        public boolean buySide() {
+            return !sellSide;
+        }
+
+        /** 是否允许回收（卖出）：只有卖出栏位的条目才可回收。 */
         public boolean sellable() {
-            return sellPrice > 0;
+            return sellSide && sellPrice > 0;
         }
     }
 }
